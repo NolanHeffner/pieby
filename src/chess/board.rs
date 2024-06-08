@@ -6,13 +6,20 @@ struct Board {
 }
 
 impl Board {
-    fn parseFEN(&mut self) {
-        // Update individual piece occupation bitboards
-        
+    fn setSquare(&mut self, squarePos: u8, piece: Types::Piece) {
+        let row : u8 = squarePos % 8;
+        self.board[row][squarePos - 8 * row].setPiece(piece);
     }
 
-    fn parsePGN() {
+    fn setSquare(&mut self, squarePos: u8, piece: Types::Piece) {
+        let row : u8 = squarePos % 8;
+        self.board[row][squarePos - 8 * row].setPiece(piece);
+    }
 
+    fn setSquares(&mut self, squarePos: &Vec<u8>, pieces: Types::Piece) {
+        for idx in 1..len(squarePos) {
+            self.setSquare(squarePos.get(idx), pieces)
+        }
     }
 
     fn getSquare(&self, squarePos: u8) -> &Square {
@@ -21,8 +28,7 @@ impl Board {
     }
 
     fn clearSquare(&mut self, squarePos: u8) {
-        let row : u8 = squarePos % 8;
-        self.board[row][squarePos - 8 * row].setPiece(None);
+        self.setSquare(squarePos, Types::Piece::NONE);
     }
 }
 

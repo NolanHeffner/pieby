@@ -14,10 +14,12 @@ fn main() {
 } */
 
 fn main() {
-    let num : u8 = 0b10001010;
+/*     let num : u8 = 0b10001010;
     let numinv = !num;
     fn shift(&binNum: &u8) -> u8 {
         binNum << -1
     }
-    println!("{:#b}, {:#b}, {:#b}", num, numinv, shift(&num));
+    println!("{:#b}, {:#b}, {:#b}", num, numinv, shift(&num)); */
+    /* let arr : [[i32; 3]; 3] = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+    println!("{}", arr[1][2]); */
 }
