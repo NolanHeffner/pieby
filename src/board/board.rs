@@ -1,3 +1,6 @@
+
+mod board;
+
 use crate::chess::Position;
 use crate::board::Types;
 
@@ -16,8 +19,8 @@ impl Board {
         self.board[row][squarePos - 8 * row].setPiece(piece);
     }
 
-    fn setSquares(&mut self, squarePos: &Vec<u8>, pieces: Types::Piece) {
-        for idx in 1..len(squarePos) {
+    fn setSquares(&mut self, startPos: u8, endPos: u8, pieces: Types::Piece) {
+        for idx in startPos..endPos {
             self.setSquare(squarePos.get(idx), pieces)
         }
     }
@@ -44,5 +47,24 @@ impl Square {
 
     fn getPiece(&self) -> &Piece {
         &self.piece
+    }
+
+    fn get_ASCII(&self) -> &str {
+        let symbols : [&str; 14] = ["♔", "♕", "♖", "♗", "♘", "♙", "🦆", "♚", "♛", "♜", "♝", "♞", "♟︎", "🦆"];
+        let index : u8 = match self.piece {
+            KING => 0,
+            QUEEN => 1,
+            ROOK => 2,
+            BISHOP => 3,
+            KNIGHT => 4,
+            PAWN => 5,
+            DUCK => 6,
+        };
+        index += match self.color {
+            WHITE => 7,
+            BLACK => 0,
+            YELLOW => 0,
+        };
+        symbols[index]
     }
 }

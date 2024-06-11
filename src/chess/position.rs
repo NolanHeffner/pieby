@@ -1,3 +1,6 @@
+
+mod position;
+
 use crate::board::Board;
 use crate::board::Types;
 
@@ -48,7 +51,7 @@ impl Position {
                     };
                     let startPos = 8 * row + column;
                     let endPos = 8 * row + column + token_num - 1;
-                    self.board.setSquares(Vec<u8>::from(startPos..endPos), Types::PieceType::NONE);
+                    self.board.setSquares(startPos, endPos, Types::PieceType::NONE);
                     column += token_num;
                 } else {
                     self.board.setSquare(Piece {
@@ -69,7 +72,7 @@ impl Position {
             "b" => Types::Color::BLACK,
         }
         // Field 3 is the ability for either side to castle
-        
+
 
 
     }

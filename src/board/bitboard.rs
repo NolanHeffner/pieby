@@ -1,4 +1,6 @@
 
+mod bitboard;
+
 /*
 Counting
 1 2 3 4 . . .

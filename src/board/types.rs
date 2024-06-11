@@ -1,4 +1,6 @@
 
+mod types;
+
 enum PieceType {
     KING,
     QUEEN,
@@ -36,7 +38,7 @@ impl Piece {
         }
     }
 
-    fn get_ASCII(&self) -> &str {
+/*     fn get_ASCII(&self) -> &str {
         letter = match self.piece_type {
             KING => "K",
             QUEEN => "Q",
@@ -52,5 +54,5 @@ impl Piece {
         } else {
             return letter;
         }
-    }
+    } */
 }
