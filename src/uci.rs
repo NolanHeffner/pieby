@@ -31,7 +31,11 @@ impl UCIEngine {
             },
         }
     }
-    pub fn uci_loop(&self) {
+    pub fn uci_loop(&mut self) {
+        // Instantiate new search object below before loop
+
+
+        // Loop starts
         loop {
             // Get messages input
             let mut input = String::new();

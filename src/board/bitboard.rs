@@ -1,6 +1,4 @@
 
-mod bitboard;
-
 /*
 Counting
 1 2 3 4 . . .
@@ -11,62 +9,48 @@ Counting
 57 58 59 . . .
 */
 
-
-struct Bitboard {
-    name: String,
-    board: u64, // effectively 64 bits in binary
-}
+pub struct Bitboard(u64); // effectively 64 bits in binary
 
 impl Bitboard {
     // Bitboard builder
-    fn new(name: &str, board: &u64) -> Bitboard {
-        Bitboard {
-            name,
-            board,
-        }
+    pub fn new(board: u64) -> Bitboard {
+        Bitboard(board)
     }
 
     // Bitwise board operations
-    fn board_invert(&mut self) {
-        self.board = !&self.board;
+    pub fn board_invert(&mut self) {
+        self.0 = !self.0;
     }
-    fn board_shift(&mut self, bits: &i8) { // positive -> shift right, negative -> shift left
-        self.board >>= bits;
+    pub fn board_shift(&mut self, bits: &i8) { // positive -> shift right, negative -> shift left
+        self.0 >>= bits;
     }
-    fn intersection(&self, other: &Bitboard) -> &Bitboard {
-        self.board & other
+    pub fn intersection(&self, other: &Bitboard) -> u64 {
+        self.0 & other.0
     }
-    fn union(&self, other: &Bitboard) -> &Bitboard {
-        self.board | other
+    pub fn union(&self, other: &Bitboard) -> u64 {
+        self.0 | other.0
     }
-    fn xor(&self, other: &Bitboard) -> &Bitboard {
-        self.board ^ other
+    pub fn xor(&self, other: &Bitboard) -> u64 {
+        self.0 ^ other.0
     }
 
 
     // Other board operations
-    fn popcnt(&self) -> i32 { // Returns number of ones
+    /* fn popcnt(&self) -> i32 { // Returns number of ones
         // self.board.count_ones()
+    } */
+    pub fn mirrorHorizontal(&self) -> u64 {
+        self.0 ^ 7
     }
-    fn mirrorHorizontal(&self) -> Bitboard {
-        self.board ^ 7
-    }
-    fn mirrorVertical(&self) -> Bitboard {
-        self.board ^ 56
+    pub fn mirrorVertical(&self) -> u64 {
+        self.0 ^ 56
     }
 
     // Bit operations
-    fn set_bit(&mut self, position: u8) {
-        
+    pub fn set_bit(&self, position: u8, value: bool) -> u64 {
+        self.0 | ((value as u64) << position)
     }
-    fn is_bit_filled(&mut self, position: u8) {
-        return &self.board
+    pub fn bit_at_pos(&self, position: u8) -> u64 {
+        (self.0 << position) & 0xFF
     }
-}
-
-struct magicBitboard {
-    //toSqBB: []Bitboard, // Currently using Go notation, need to fix
-    innerBB: Bitboard,
-    magic: u64,
-    shift: u32
 }

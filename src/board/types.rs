@@ -1,7 +1,12 @@
 
-mod types;
+use crate::board::bitboard;
 
-enum PieceType {
+// Eventually need to implement operator capabilities for bitboards so no need for commands
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, Not};
+
+use super::bitboard::Bitboard;
+
+pub enum PieceType {
     KING,
     QUEEN,
     ROOK,
@@ -12,29 +17,45 @@ enum PieceType {
     NONE
 }
 
-enum Color {
+pub enum Color {
     WHITE,
     BLACK,
     YELLOW
 }
 
-struct Piece {
+pub struct Piece {
     piece_type: PieceType,
     color: Color,
-    attack_bitboard: Bitboard,
+    attack_bitboard: bitboard::Bitboard,
 }
 
 impl Piece {
-    fn value(&self) -> f64 {
+    pub fn new(piece_type: PieceType, color: Color) -> Piece {
+        Piece {
+            piece_type,
+            color,
+            attack_bitboard: Bitboard::new(0), // or some default value
+        }
+    }
+
+    pub fn get_type(&self) -> &PieceType {
+        &self.piece_type
+    }
+
+    pub fn get_color(&self) -> &Color {
+        &self.color
+    }
+
+    pub fn value(&self) -> f64 {
         match self.piece_type {
-            KING => 1000,
-            QUEEN => 9,
-            ROOK => 5,
-            BISHOP => 3.2,
-            KNIGHT => 3,
-            PAWN => 1.1,
-            DUCK => 0,
-            NONE => 0,
+            PieceType::KING => 1000.0,
+            PieceType::QUEEN => 9.0,
+            PieceType::ROOK => 5.0,
+            PieceType::BISHOP => 3.2,
+            PieceType::KNIGHT => 3.0,
+            PieceType::PAWN => 1.1,
+            PieceType::DUCK => 0.0,
+            PieceType::NONE => 0.0,
         }
     }
 

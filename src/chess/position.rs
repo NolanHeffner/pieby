@@ -1,19 +1,16 @@
 
-mod position;
-
-use crate::board::Board;
-use crate::board::Types;
+use crate::board::{board::{Square, Board}, types};
 
 struct PlayerInfo {
-    color: Types::Color,
+    color: types::Color,
     castling_rights: bool,
     time_remaining: f64,
     increment: f64,
 }
 
 struct Position {
-    board: Board::Board,
-    turn: Types::Color,
+    board: Board,
+    turn: types::Color,
     castling: [bool; 4], // order KQkq
     // attackBitboards: [Bitboards],
 }
@@ -34,33 +31,23 @@ impl Position {
             let tokens : Vec<char> = row.chars().collect();
             let column : u8 = 0;
             for token in tokens.iter() {
-                let allowed_tokens : [str; 1] = ["a"];
+                /* let allowed_tokens : [str; 1] = ["a"];
                 if !allowed_tokens.contains(&token) {
                     panic!()
-                } else if token.is_numeric() {
-                    let token_num : u8 = match token {
-                        "1" => 1,
-                        "2" => 2,
-                        "3" => 3,
-                        "4" => 4,
-                        "5" => 5,
-                        "6" => 6,
-                        "7" => 7,
-                        "8" => 8,
-                        default => 1,
-                    };
+                } else */ if token.is_numeric() {
+                    let token_num : u8 = token.to_string().as_bytes()[0] - 48;
                     let startPos = 8 * row + column;
                     let endPos = 8 * row + column + token_num - 1;
-                    self.board.setSquares(startPos, endPos, Types::PieceType::NONE);
+                    self.board.setSquares(startPos, endPos, types::PieceType::NONE);
                     column += token_num;
                 } else {
-                    self.board.setSquare(Piece {
-                        piece_type: PAWN,
-                        color: match token.is_ascii_uppercase() {
-                            true => Types::Color::WHITE,
-                            false => Types::Color::BLACK
+                    self.board.setSquare(types::Piece::new(
+                        types::PieceType::PAWN,
+                        match token.is_ascii_uppercase() {
+                            true => types::Color::WHITE,
+                            false => types::Color::BLACK
                         },
-                    });
+                    ));
                     column += 1;
                 }
             }
