@@ -9,7 +9,7 @@ I started this project with Matt because I wanted to have an engine to call my o
 ## Current To-Do List
 
 - [ ] Finish magic number generation for bitboards
-- [ ] Finish programming Zobrist hashing
+- [X] Finish programming Zobrist hashing
 - [ ] Perform bitboard tests
 - [ ] Integrate bitboards into position representation
 - [ ] Implement minimax / negamax search

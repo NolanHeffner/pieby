@@ -12,6 +12,8 @@ Counting
 pub struct Bitboard(u64); // effectively 64 bits in binary
 
 impl Bitboard {
+    pub const EMPTY : Bitboard = Bitboard(0);
+
     // Bitboard builder
     pub fn new(board: u64) -> Bitboard {
         Bitboard(board)
