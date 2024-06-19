@@ -4,10 +4,11 @@ use crate::board::types::{Color, PieceType};
 use super::{bitboard::Bitboard, types::Piece};
 
 pub struct Board {
-    // a1 -> 1, h1 -> 8, a8 -> 57, h8 -> 64
+    // a1 -> 0, h1 -> 7, a8 -> 56, h8 -> 63
     // board: [[Square; 8]; 8],
     pieces: [Bitboard; PieceType::COUNT],
     colors: [Bitboard; Color::COUNT],
+    hash: u64,
 }
 
 impl Board {
@@ -16,6 +17,7 @@ impl Board {
         Board {
             pieces: [Bitboard::EMPTY; PieceType::COUNT],
             colors: [Bitboard::EMPTY; Color::COUNT],
+            hash: 0,
         }
     }
 

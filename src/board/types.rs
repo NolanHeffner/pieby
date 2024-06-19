@@ -29,14 +29,14 @@ impl PieceType {
     }
 }
 
-pub enum Color {
-    WHITE,
-    BLACK,
-    YELLOW,
-    NONE
-}
+pub struct Color(u8);
 
 impl Color {
+    pub const WHITE : Color = Color(0);
+    pub const BLACK : Color = Color(1);
+    pub const YELLOW : Color = Color(2);
+    pub const NONE : Color = Color(3);
+
     pub const COUNT: usize = 3;
 
     pub fn new(idx: usize) -> Color {
@@ -49,13 +49,9 @@ impl Color {
     }
 
     pub fn index(&self) -> usize {
-        match self {
-            Color::WHITE => 0,
-            Color::BLACK => 1,
-            Color::YELLOW => 2,
-            Color::NONE => 3,
-        }
+        self.0 as usize
     }
+
     /*
     pub fn index(&self) -> usize {
         *self as usize
@@ -83,7 +79,7 @@ impl Piece {
     } // Eventually replace with trait to enable "as" functionality for u8?
 
     pub fn index(&self) -> usize { // Indexes non-NONE pieces to usizes 1 through 14
-        let idx = 7 * self.color.index() - self.piece_type.0;
+        let idx = 7 * self.color.index() - self.piece_type.index();
         idx as usize + PieceType::COUNT
     }
 

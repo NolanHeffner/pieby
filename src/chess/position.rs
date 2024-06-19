@@ -1,18 +1,19 @@
 
-use crate::board::{board::Board, types::{self, Color, PieceType}};
+use crate::board::{board::Board, types::{self, Color, Piece, PieceType}};
 
-struct PlayerInfo {
+pub struct PlayerInfo {
     color: types::Color,
     castling_rights: bool,
     time_remaining: f64,
     increment: f64,
 }
 
-struct Position {
+pub struct Position {
     board: Board,
     turn: types::Color,
     castling: [bool; 4], // order KQkq
     // attackBitboards: [Bitboards],
+    en_pessant: u8, // Defaults to u8::max if impossible, otherwise 0-63 for en-pessantable square
 }
 
 impl Position {
@@ -22,15 +23,23 @@ impl Position {
             board: Board::empty(),
             turn: Color::NONE,
             castling: [false; 4],
+            en_pessant: 0,
         }
     }
 
-    fn parse_FEN(&mut self, fen: &str) -> Position {
+    fn parse_FEN(&mut self, fen_opt: Option<&str>) -> Position {
 
         // Update individual piece occupation bitboards
         // let content = FEN.split(" ").collect::<Vec<&str>>();
+        let mut fen: &str = match fen_opt {
+            Some(fen) => fen,
+            None => {
+                println!("Error in FEN parsing - No FEN provided. Defaulting to starting position.");
+                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" // Game starting position
+            },
+        };
 
-        let board : Board = Board::empty();
+        let mut board : Board = Board::empty();
 
         let [board_info, color_info, castling_info, ep_info] = fen.split_whitespace().collect::<Vec<&str>>()[0..4] else {
             println!("info string invalid fen");
@@ -52,19 +61,43 @@ impl Position {
                 '1'..='8' => {
                     file += (token as u8) - b'0' // Need to check this actually works
                 }
-                '_' => {
-                    board.set_square(8 * rank + file, PieceType::new("".find())); // Need to fix
+                _ => {
+                    // Index -> 7 * color_index + piece_index
+                    let idx = "KQRBNPDkqrbnpd".find(token).unwrap();
+                    let color = Color::new(idx - idx % 6);
+                    let piece_type = PieceType::new(idx % 6);
+
+                    board.set_square(8 * rank + file, &Piece::new(piece_type, color));
+
+                    file += 1
                 }
             }
         }
 
-        let turn = Color::NONE;
-        let castling = [false; 4];
+        let turn = Color::new((color_info == "b") as usize);
 
+        let castling_str = String::from(castling_info);
+        let mut castling = [false; 4];
+        if castling_str != "-" {
+            let valid_tokens = ["K", "Q", "k", "q"];
+            for idx in 1..4 {
+                if castling_str.contains(valid_tokens[idx]) {
+                    castling[idx] = true;
+                }
+            }
+        }
+
+        let mut en_pessant = u8::MAX;
+        let ep_tokens = ep_info.chars().collect::<Vec<char>>();
+        if ep_tokens[0] != '-' {
+            en_pessant = 8 * ((ep_tokens[1] as u8) - b'0') + "abcdefgh".find(ep_tokens[0]).unwrap() as u8;
+        }
+        
         Position {
             board,
             turn,
-            castling
+            castling,
+            en_pessant,
         }
 
         // There are 6 fields to the FEN, separated by spaces. Field 1 is piece placement
@@ -102,8 +135,6 @@ impl Position {
             "b" => Types::Color::BLACK,
         } */
         // Field 3 is the ability for either side to castle
-
-
 
     }
 

@@ -15,7 +15,7 @@ pub fn castle_key(idx: usize) -> u64 {
 }
 
 pub fn en_pessant_key(file: u8) -> u64 {
-    ZOBRIST_KEYS[(900 + file) as usize]
+    ZOBRIST_KEYS[900 + file as usize]
 }
 
 pub const fn white_to_move_key() -> u64 {
