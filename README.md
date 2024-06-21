@@ -21,5 +21,4 @@ I started this project with Matt because I wanted to have an engine to call my o
 
 Matt and Nolan are college students at Georgia Tech. We like.. idk, math and stuff!
 
-<img src="your_relative_path_here" width="350" alt="Photo of authors">
-
+<img src="./authors.jpeg" width="350" alt="Photo of authors">
