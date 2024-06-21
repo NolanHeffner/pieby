@@ -139,6 +139,8 @@ impl Position {
     }
 
     fn parsePGN(&mut self, PGN: &str) {
-
+        // Call a bunch of makeMoves on a position object
+        let initial_position = self.parse_FEN(None);
+        
     }
 }
