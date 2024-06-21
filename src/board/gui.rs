@@ -1,7 +1,7 @@
 
 use crate::board::board::Board;
 
-fn printBoardFancy(board: &Board) {
+fn print_board_fancy(board: &Board) {
     // Note: UCI ignores unrecognized commands, and so we can print by sending junk commands
     // ♔♕♖♗♘♙♚♛♜♝♞♟︎🦆
     let symbols : [&str; 16] = ["♔", "♕", "♖", "♗", "♘", "♙", "🦆", " ", "♚", "♛", "♜", "♝", "♞", "♟︎", "🦆", " "];
@@ -17,11 +17,11 @@ fn printBoardFancy(board: &Board) {
     println!("╚═══╩═══╩═══╩═══╩═══╩═══╩═══╩═══╝")
 }
 
-fn genFEN(board: &Board) {
+fn gen_FEN(board: &Board) {
 
     
 }
 
-fn genPGN() {
+fn gen_PGN() {
 
 }

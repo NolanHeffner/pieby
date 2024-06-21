@@ -16,3 +16,10 @@ I started this project with Matt because I wanted to have an engine to call my o
 - [ ] Program PGN parsing
 - [ ] Add Hash to options
 - [ ] Add basic HCE evaluation so that thing functions on basic level
+
+## About the authors
+
+Matt and Nolan are college students at Georgia Tech. We like.. idk, math and stuff!
+
+![Image of authors](./authors.jpeg)
+

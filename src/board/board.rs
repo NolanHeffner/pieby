@@ -21,15 +21,15 @@ impl Board {
         }
     }
 
-    pub fn make_move(&mut self, startPos: u8, endPos: u8) {
+    pub fn make_move(&mut self, start_pos: u8, end_pos: u8) {
         //let piece : &Piece = self.getSquare(startPos).get_piece();
         //self.getSquare(endPos).set_piece(piece);
         //self.clearSquare(startPos);
         for board in &self.pieces {
-            if (board.bit_at_pos(startPos) == 1) {
+            if board.bit_at_pos(start_pos) == 1 {
                 if self.is_move_legal() {
-                    board.set_bit(startPos, false);
-                    board.set_bit(endPos, true);
+                    board.set_bit(start_pos, false);
+                    board.set_bit(end_pos, true);
                 }
             }
         }
@@ -39,23 +39,23 @@ impl Board {
         true
     }
     
-    pub fn set_square(&mut self, squarePos: u8, piece: &Piece) {
+    pub fn set_square(&mut self, square_pos: u8, piece: &Piece) {
         // Need to write extra code to ensure that we overwrite previous occupancies
-        self.pieces[piece.get_type().index()].set_bit(squarePos, true);
-        self.colors[piece.get_color().index()].set_bit(squarePos, true);
+        self.pieces[piece.get_type().index()].set_bit(square_pos, true);
+        self.colors[piece.get_color().index()].set_bit(square_pos, true);
     }
 
-    pub fn get_square(&self, squarePos: u8) -> Piece {
+    pub fn get_square(&self, square_pos: u8) -> Piece {
         let mut piece_type : PieceType = PieceType::NONE;
         for idx in 1..PieceType::COUNT {
-            if self.pieces[idx].bit_at_pos(squarePos) == 1 {
+            if self.pieces[idx].bit_at_pos(square_pos) == 1 {
                 piece_type = PieceType::new(idx);
             }
         }
 
         let mut piece_color : Color = Color::NONE;
         for idx in 1..Color::COUNT {
-            if self.colors[idx].bit_at_pos(squarePos) == 1 {
+            if self.colors[idx].bit_at_pos(square_pos) == 1 {
                 piece_color = Color::new(idx);
             }
         }
@@ -63,27 +63,17 @@ impl Board {
         Piece::new(piece_type, piece_color)
     }
 
-    /*
-    pub fn setSquare(&mut self, squarePos: u8, piece: &Piece) {
-        let row : usize = (squarePos as usize) % 8;
-        self.board[row][squarePos as usize - 8 * row].set_piece(&piece);
+    pub fn get_rank(rank: u8) -> Bitboard {
+        if rank > 7 {return Bitboard::new(0)}
+        let shift = 8 * rank - 8;
+        // print_bitboard((0xFF as u64) << shift)
+        Bitboard::new((0xFF as u64) << shift)
     }
-
-    pub fn setSquares(&mut self, startPos: u8, endPos: u8, pieces: Piece) {
-        for idx in startPos..endPos {
-            self.setSquare(idx, &pieces)
-        }
+    
+    pub fn get_file(file: u8) -> Bitboard {
+        if file > 7 {return Bitboard::new(0)}
+        Bitboard::new(0x0101010101010101 << (file - 1))
     }
-
-    pub fn getSquare(&mut self, squarePos: u8) -> &mut Square {
-        let row : u8 = squarePos % 8;
-        &mut self.board[row as usize][(squarePos - 8 * row) as usize]
-    }
-
-    pub fn clearSquare(&mut self, squarePos: u8) {
-        self.setSquare(squarePos, Piece {});
-    }
-    */
 }
 
 /*

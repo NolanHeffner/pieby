@@ -53,6 +53,22 @@ impl Bitboard {
         self.0 | ((value as u64) << position)
     }
     pub fn bit_at_pos(&self, position: u8) -> u64 {
-        (self.0 << position) & 0xFF
+        (self.0 >> position) & 1
+    }
+
+    pub fn print_bitboard(bitboard: Bitboard) {
+        println!("\n");
+        let mut rank = 7;
+        while rank >= 0 {
+            let mut row = String::from("");
+            let mut file = 0;
+            while file < 8 {
+                let square : u8 = 8 * rank + file;
+                row = format!("{}{:b} ", row, (bitboard.0 >> square) & 1);
+                file += 1;
+            }
+            println!("{}\n", row);
+            rank -= 1;
+        }
     }
 }

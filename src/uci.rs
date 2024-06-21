@@ -20,6 +20,7 @@ pub struct Options {
 }
 
 impl UCIEngine {
+
     pub fn new(engine_name: &'static str, engine_authors: &'static str, engine_version: &'static str) -> UCIEngine {
         UCIEngine {
             engine_name,
@@ -31,6 +32,7 @@ impl UCIEngine {
             },
         }
     }
+    
     pub fn uci_loop(&mut self) {
         // Instantiate new search object below before loop
 
@@ -67,7 +69,12 @@ impl UCIEngine {
                 },
                 "register" => {},
                 "ucinewgame" => {},
-                "position" => {},
+                "position" => {
+                    match tokens[1] {
+                        "fen" => 
+                        _ => println!("Error: Invalid specification for command 'position'."),
+                    }
+                },
                 "go" => {
                     /*
                     match tokens[1] {
