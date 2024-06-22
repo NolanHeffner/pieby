@@ -1,46 +1,40 @@
 
-/*
-Counting
-1 2 3 4 . . .
-9 10 11 12 . . .
-.    .
-.      .
-.        .
-57 58 59 . . .
-*/
-
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Sub};
 pub struct Bitboard(u64); // effectively 64 bits in binary
 
 impl Bitboard {
     pub const EMPTY : Bitboard = Bitboard(0);
 
     // Bitboard builder
+
     pub fn new(board: u64) -> Bitboard {
         Bitboard(board)
     }
 
     // Bitwise board operations
+
     pub fn board_invert(&mut self) {
         self.0 = !self.0;
     }
+
     pub fn board_shift(&mut self, bits: &i8) { // positive -> shift right, negative -> shift left
         self.0 >>= bits;
     }
+
     pub fn intersection(&self, other: &Bitboard) -> u64 {
         self.0 & other.0
     }
+
     pub fn union(&self, other: &Bitboard) -> u64 {
         self.0 | other.0
     }
+
     pub fn xor(&self, other: &Bitboard) -> u64 {
         self.0 ^ other.0
     }
 
-
     // Other board operations
-    /* fn popcnt(&self) -> i32 { // Returns number of ones
-        // self.board.count_ones()
-    } */
+
     pub fn mirrorHorizontal(&self) -> u64 {
         self.0 ^ 7
     }
@@ -49,6 +43,7 @@ impl Bitboard {
     }
 
     // Bit operations
+
     pub fn set_bit(&self, position: u8, value: bool) -> u64 {
         self.0 | ((value as u64) << position)
     }
@@ -56,10 +51,13 @@ impl Bitboard {
         (self.0 >> position) & 1
     }
 
+    // Util functions
+
     pub fn print_bitboard(bitboard: Bitboard) {
         println!("\n");
-        let mut rank = 7;
-        while rank >= 0 {
+        let mut rank = 8;
+        while rank > 0 {
+            rank -= 1;
             let mut row = String::from("");
             let mut file = 0;
             while file < 8 {
@@ -68,7 +66,63 @@ impl Bitboard {
                 file += 1;
             }
             println!("{}\n", row);
-            rank -= 1;
         }
+    }
+}
+
+impl BitAnd for Bitboard {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        Self(self.0 & rhs.0)
+    }
+}
+
+impl BitAndAssign for Bitboard {
+    fn bitand_assign(&mut self, rhs: Self) {
+        self.0 &= rhs.0;
+    }
+}
+
+impl BitOr for Bitboard {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Self(self.0 | rhs.0)
+    }
+}
+
+impl BitOrAssign for Bitboard {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
+    }
+}
+
+impl BitXor for Bitboard {
+    type Output = Self;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        Self(self.0 ^ rhs.0)
+    }
+}
+
+impl BitXorAssign for Bitboard {
+    fn bitxor_assign(&mut self, rhs: Self) {
+        self.0 ^= rhs.0;
+    }
+}
+
+impl Sub for Bitboard {
+    type Output = Bitboard;
+    fn sub(self, rhs: Bitboard) -> Self::Output {
+        Self(self.0 - rhs.0)
+    }
+}
+
+impl Not for Bitboard {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        Self(!self.0)
     }
 }

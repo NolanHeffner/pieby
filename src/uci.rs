@@ -71,7 +71,7 @@ impl UCIEngine {
                 "ucinewgame" => {},
                 "position" => {
                     match tokens[1] {
-                        "fen" => 
+                        // "fen" => 
                         _ => println!("Error: Invalid specification for command 'position'."),
                     }
                 },
