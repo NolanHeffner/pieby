@@ -1,3 +1,4 @@
+#![allow(unused, non_snake_case)]
 
 use crate::board::board::Board;
 

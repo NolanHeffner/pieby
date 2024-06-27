@@ -70,7 +70,7 @@ impl Piece {
         Piece {
             piece_type,
             color,
-            attack_bitboard: Bitboard::new(0), // or some default value
+            attack_bitboard: Bitboard::EMPTY, // or some default value
         }
     }
 
@@ -87,18 +87,17 @@ impl Piece {
         &self.color
     }
 
-    pub fn value(&self) -> f64 {
+    /* pub fn value(&self) -> f64 {
         match self.piece_type.0 {
-            KING => 1000.0,
+            PieceType::KING => 1000.0,
             QUEEN => 9.0,
             ROOK => 5.0,
             BISHOP => 3.2,
             KNIGHT => 3.0,
             PAWN => 1.1,
-            DUCK => 0.0,
-            NONE => 0.0,
+            _ => 0.0,
         }
-    }
+    } */
 
 /*     fn get_ASCII(&self) -> &str {
         letter = match self.piece_type {

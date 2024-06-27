@@ -1,4 +1,4 @@
-
+#![allow(unused, non_snake_case)]
 
 use super::{bitboard::Bitboard, types::{Color, Piece, PieceType}, zobrist};
 
@@ -77,15 +77,15 @@ impl Board {
     }
 
     pub fn get_rank(rank: u8) -> Bitboard {
-        if rank > 7 {return Bitboard::new(0)}
+        if rank > 7 {return Bitboard::EMPTY}
         let shift = 8 * rank - 8;
         // print_bitboard((0xFF as u64) << shift)
-        Bitboard::new((0xFF as u64) << shift)
+        Bitboard((0xFF as u64) << shift)
     }
     
     pub fn get_file(file: u8) -> Bitboard {
-        if file > 7 {return Bitboard::new(0)}
-        Bitboard::new(0x0101010101010101 << (file - 1))
+        if file > 7 {return Bitboard::EMPTY}
+        Bitboard(0x0101010101010101 << (file - 1))
     }
 
 

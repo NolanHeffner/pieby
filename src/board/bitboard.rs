@@ -1,15 +1,17 @@
+#![allow(unused)]
 
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Sub};
-pub struct Bitboard(u64); // effectively 64 bits in binary
+
+pub struct Bitboard(pub u64); // effectively 64 bits in binary
 
 impl Bitboard {
     pub const EMPTY : Bitboard = Bitboard(0);
 
-    // Bitboard builder
+    // to u64
 
-    pub fn new(board: u64) -> Bitboard {
-        Bitboard(board)
-    }
+    pub fn value(&self) -> u64 {
+        self.0
+    }    
 
     // Bitwise board operations
 
@@ -35,10 +37,11 @@ impl Bitboard {
 
     // Other board operations
 
-    pub fn mirrorHorizontal(&self) -> u64 {
+    pub fn mirror_horizontal(&self) -> u64 {
         self.0 ^ 7
     }
-    pub fn mirrorVertical(&self) -> u64 {
+
+    pub fn mirror_vertical(&self) -> u64 {
         self.0 ^ 56
     }
 
@@ -47,6 +50,7 @@ impl Bitboard {
     pub fn set_bit(&self, position: u8, value: bool) -> u64 {
         self.0 | ((value as u64) << position)
     }
+
     pub fn bit_at_pos(&self, position: u8) -> u64 {
         (self.0 >> position) & 1
     }
@@ -125,4 +129,17 @@ impl Not for Bitboard {
     fn not(self) -> Self::Output {
         Self(!self.0)
     }
+}
+
+// Utility functions
+
+pub fn get_rank(rank: u8) -> Bitboard {
+    // if rank > 7 {return Bitboard::new(0)}
+    let shift = 8 * rank;
+    // print_bitboard((0xFF as u64) << shift)
+    Bitboard((0xFF as u64) << shift)
+}
+
+pub fn get_file(file: u8) -> Bitboard {
+    Bitboard(0x0101010101010101 << file)
 }

@@ -1,10 +1,12 @@
 
-use rand::Rng;
+use rand::{Error, Rng};
 
-use crate::board::{magic, bitboard::Bitboard};
+use crate::board::{magic::BlackMagic, bitboard::{Bitboard, get_file, get_rank}};
 
-// Critical initialization data
+// Initialization data
+// Note as of 6/27: Arrays denote number of relevant bits - replaced by popcnt(occ_mask)
 
+/* 
 const BISHOP_BITS : [i8; 64] = [
     6, 5, 5, 5, 5, 5, 5, 6,
     5, 5, 5, 5, 5, 5, 5, 5,
@@ -26,10 +28,11 @@ const ROOK_BITS: [i8; 64] = [
     11, 10, 10, 10, 10, 10, 10, 11,
     12, 11, 11, 11, 11, 11, 11, 12,
 ];
+ */
 
 // Bitboard manipulation tools
 
-pub fn gen_few_bit_u64() -> u64 {
+fn gen_few_bit_u64() -> u64 {
     let mut rng = rand::thread_rng();
     let num = rng.gen::<u64>() & rng.gen::<u64>() & rng.gen::<u64>();
     num
@@ -45,99 +48,150 @@ pub fn popcnt(num: u64) -> u8 {
     count
 }
 
-pub fn get_rank(rank: u8) -> Bitboard {
-    // if rank > 7 {return Bitboard::new(0)}
-    let shift = 8 * rank;
-    // print_bitboard((0xFF as u64) << shift)
-    Bitboard::new((0xFF as u64) << shift)
-}
-
-pub fn get_file(file: u8) -> Bitboard {
-    Bitboard::new(0x0101010101010101 << file)
-}
-
 // pub fn ls1b_index(num: u64) // Replaced by .trailing_zeros()
 
-// Generate attack bitboards
+// Generate mask bitboards
 
-pub fn gen_rook_attacks(rank: u8, file: u8) -> Bitboard {
+pub fn rook_mask(rank: u8, file: u8) -> Bitboard {
     if rank > 7 || file > 7 {
         println!("Error. Rank and file index from 0 to 7.");
-        return Bitboard::new(0)
+        return Bitboard::EMPTY
     }
     let square = 8 * rank + file;
-    (get_rank(rank) | get_file(file)) - Bitboard::new(1 << square)
+    (get_rank(rank) | get_file(file)) - Bitboard(1 << square)
 }
 
-pub fn gen_bishop_attacks(rank: u8, file: u8) -> Bitboard {
+pub fn bishop_mask(rank: u8, file: u8) -> Bitboard {
     if rank > 7 || file > 7 {
         println!("Error. Rank and file index from 0 to 7.");
-        return Bitboard::new(0)
+        return Bitboard::EMPTY
     }
     let square = 8 * rank + file;
     let square_board : u64 = 1 << square;
     let mut ret = square_board;
     for h in 0..8 {
-        if 0 <= (rank + h - file) && (rank + h - file) <= 7 {
+        if file <= (rank + h) && (rank + h) <= (7 + file) {
             ret += 1 << (square - 9 * (file - h))
         }
-        if 0 <= (rank - h + file) && (rank - h + file) <= 7  {
+        if h <= (rank + file) && (rank + file) <= (7 + h) {
             ret += 1 << (square + 7 * (file - h))
         }
     }
-    Bitboard::new(ret - 2 * square_board)
+    Bitboard(ret - 2 * square_board)
 }
 
-pub fn rmask(rank: u8, file: u8) -> Bitboard {
+fn prune(board: Bitboard, rank: u8, file: u8) -> Bitboard {
     let mut mask = Bitboard::EMPTY;
     if rank != 1 {mask |= get_rank(1);}
     if rank != 7 {mask |= get_rank(7);}
     if file != 1 {mask |= get_file(1);}
     if file != 7 {mask |= get_file(7);}
-    gen_rook_attacks(rank, file) & !mask
+    board & !mask
 }
 
-pub fn bmask(rank: u8, file: u8) -> Bitboard {
-    let mut mask = Bitboard::EMPTY;
-    if rank != 1 {mask |= get_rank(1);}
-    if rank != 7 {mask |= get_rank(7);}
-    if file != 1 {mask |= get_file(1);}
-    if file != 7 {mask |= get_file(7);}
-    gen_bishop_attacks(rank, file) & !mask
+// Generate attack boards
+
+fn rook_attacks(block: u8, rank: u8, file: u8) -> Bitboard {
+    let mask = prune(rook_mask(rank, file), rank, file);
+
 }
 
 // Generating magic numbers
 
-pub fn magic_gen(square: u8, relevant_bits: [u8; 64], attack_mask: u64) -> [u64; 64] {
-    // Initialize occupancies
-    let occupancies : [u64; 4096];
+pub fn magic_gen(square: u8, occ_mask: u64, is_bishop: bool, attempts: u64) -> BlackMagic {
+    let rel_bits = popcnt(occ_mask); // Counts number of relevant bits in mask
+    let arr_size = 1 << rel_bits;
 
-    // Initialize attack tables
-    let attacks : [u64; 4096];
+    // Initialize occupancies and attack tables
+
+    let mut occupancies : [u64; 4096];
+    let mut attacks : [u64; 4096];
+
+    for i in 0..(1 << rel_bits) {
+        attacks[i] = if is_bishop {bmask())}
+    }
 
     // Init used attacks
-    let used_attacks : [u64; 4096];
+    let mut used_attacks : [u64; 4096];
 
     // Init attack mask for current piece
-    
 
-    [0; 64]
+    let unmask = !occ_mask;
+    for _ in 0..attempts {
+        // if count_1s((mask * magic) & 0xFF00000000000000) < 6 {continue};
+        let candidate_magic: u64 = gen_few_bit_u64();
+        let mut fail = false;
+
+        // Test magic against each attack pattern
+        for _ in 0..(1 << rel_bits) {
+            let shift = 64 - popcnt(unmask);
+        }
+    }
+
+    let mut buffer = String::new();
+    let stdin = io::stdin(); // We get `Stdin` here.
+    stdin.read_line(&mut buffer)?;
+
+    println!("Failed to find magic number for bishop on square {} in {} attempts.", square, attempts);
+    panic!();
+
+    BlackMagic::EMPTY
 }
 
-pub fn init_magic_numbers()
-{
-    let mut rook_magic_numbers : [u64; 64];
-    let mut bishop_magic_numbers : [u64; 64];
-    // loop over 64 board squares
-    for square in 0..64 {
-        // init rook magic numbers
+pub fn init_magic_numbers() -> (Vec::<BlackMagic>, Vec<BlackMagic>) {
 
-        //rook_magic_numbers[square] = magic_gen(square, ROOK_BITS[square], rook);
-        //bishop_magic_numbers[square] = magic_gen(square, BISHOP_BITS[square], bishop);
+    let mut bm_rook_table = Vec::<BlackMagic>::new();
+    let mut bm_bishop_table = Vec::<BlackMagic>::new();
 
+    let attempts = 1_000_000;
+    let (mut rank, mut file) : (u8, u8) = (0, 0);
+    while rank < 8 {
+        while file < 8 {
+            let square: u8 = 8 * rank + file;
 
+            bm_rook_table.push(magic_gen(square, rmask(rank, file).value(), false, attempts));
+            bm_bishop_table.push(magic_gen(square, rmask(rank, file).value(), false, attempts));
+
+            file += 1;
+        }
+        rank += 1;
+    }
+
+    (bm_rook_table, bm_bishop_table)
+}
+
+// Mockup function
+/* pub fn get_attack_table_index(occ: Bitboard, square: u8, bishop: bool) -> Bitboard {
+    let bm : BlackMagic = if bishop {bmBishopTbl[sq]} else {bmRookTbl[sq]};
+    let mut attacks = occ.value();
+    Bitboard(((attacks | bm.notmask) * bm.blackmagic) >> bm.shift)
+} */
+
+// return lookup[(occupied & mask) * magic >> shift];
+
+#[cfg(test)]
+mod tests {
+    use crate::util::magic_gen::init_magic_numbers;
+
+    use super::BlackMagic;
+
+    #[test]
+    fn print_magics() {
+        let (rook_magics, bishop_magics) = init_magic_numbers();
+
+        // Rook magics
+        println!("Rook magics:\n\npub const ROOK_BLACK_MAGICS: [BlackMagic; 64] = [\n");
+        for magic in rook_magics.into_iter() {
+            println!("{}\n", magic);
+        }
+        println!("];");
+
+        // Bishop magics
+        println!("Bishop magics:\n\npub const BISHOP_BLACK_MAGICS: [BlackMagic; 64] = [\n");
+        for magic in bishop_magics.into_iter() {
+            println!("{}\n", magic);
+        }
+        println!("];");
 
     }
 }
-
-// return lookup[(occupied & mask) * magic >> shift];

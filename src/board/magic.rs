@@ -1,4 +1,5 @@
 
+use std::fmt;
 use crate::board::bitboard::Bitboard;
 
 struct MagicBitboard {
@@ -8,10 +9,42 @@ struct MagicBitboard {
     shift: u32
 }
 
-pub struct Magic {
-    pub mask: u64,
-    pub factor: u64,
-    pub shift: usize,
+pub struct BlackMagic {
+    pub offset: usize,  // index of attack_table in array
+    pub notmask: u64,  // masking relevant squares (minus outer squares)
+    pub shift: u8, // Number of bits in blackmagic
+    pub blackmagic: u64, // black magic multiplication factor
+}
+
+impl BlackMagic {
+    pub const EMPTY : BlackMagic = BlackMagic {
+        offset: 0,
+        notmask: 0,
+        shift: 0,
+        blackmagic: 0,
+    };
+}
+
+impl fmt::Display for BlackMagic {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "BlackMagic {{\n\toffset: {:x},\n\tnotmask: {},\n\tshift: {},\n\tblackmagic: {},\n}}", self.offset, self.notmask, self.shift, self.blackmagic)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::BlackMagic;
+    const TEST_BM_STRUCT : BlackMagic = BlackMagic {
+        offset: 3,
+        notmask: 765,
+        shift: 13,
+        blackmagic: 4567,
+    };
+
+    //#[test]
+    fn test_display() {
+        println!("{}", TEST_BM_STRUCT);
+    }
 }
 
 /* Black magic implementation reference
