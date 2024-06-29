@@ -12,12 +12,12 @@ pub struct PlayerInfo {
 pub struct Board {
     // a1 -> 0, h1 -> 7, a8 -> 56, h8 -> 63
     // board: [[Square; 8]; 8],
-    pieces: [Bitboard; PieceType::COUNT],
-    colors: [Bitboard; Color::COUNT],
-    turn: Color,
-    castling: [bool; 4], // order KQkq
+    pub pieces: [Bitboard; PieceType::COUNT],
+    pub colors: [Bitboard; Color::COUNT],
+    pub turn: Color,
+    pub castling: [bool; 4], // order KQkq
     // attackBitboards: [Bitboards],
-    en_pessant: u8, // Defaults to u8::max if impossible, otherwise 0-63 for en-pessantable square
+    pub en_pessant: u8, // Defaults to u8::max if impossible, otherwise 0-63 for en-pessantable square
     hash: u64,
 }
 

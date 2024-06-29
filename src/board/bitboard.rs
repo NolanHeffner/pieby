@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Sub};
+use std::{fmt, ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Sub} };
 
 pub struct Bitboard(pub u64); // effectively 64 bits in binary
 
@@ -37,12 +37,12 @@ impl Bitboard {
 
     // Other board operations
 
-    pub fn mirror_horizontal(&self) -> u64 {
-        self.0 ^ 7
+    pub fn mirror_horizontal(&mut self) {
+        self.0 ^= 7;
     }
 
-    pub fn mirror_vertical(&self) -> u64 {
-        self.0 ^ 56
+    pub fn mirror_vertical(&mut self) {
+        self.0 ^= 56;
     }
 
     // Bit operations
@@ -128,6 +128,24 @@ impl Not for Bitboard {
 
     fn not(self) -> Self::Output {
         Self(!self.0)
+    }
+}
+
+impl fmt::Display for Bitboard {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut res = String::from("\n");
+        let mut rank = 8;
+        while rank > 0 {
+            rank -= 1;
+            let mut file = 0;
+            while file < 8 {
+                let square : u8 = 8 * rank + file;
+                res = format!("{}{:b} ", res, (self.0 >> (square)) & 1);
+                file += 1;
+            }
+            res += "\n"
+        }
+        write!(f, "{}", res)
     }
 }
 

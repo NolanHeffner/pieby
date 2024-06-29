@@ -62,22 +62,23 @@ pub fn rook_mask(rank: u8, file: u8) -> Bitboard {
 }
 
 pub fn bishop_mask(rank: u8, file: u8) -> Bitboard {
+    let (irank, ifile) = (rank as i8, file as i8);
     if rank > 7 || file > 7 {
         println!("Error. Rank and file index from 0 to 7.");
         return Bitboard::EMPTY
     }
-    let square = 8 * rank + file;
+    let square = 8 * irank + ifile;
     let square_board : u64 = 1 << square;
-    let mut ret = square_board;
+    let mut ret : u64 = square_board;
     for h in 0..8 {
-        if file <= (rank + h) && (rank + h) <= (7 + file) {
-            ret += 1 << (square - 9 * (file - h))
+        if (ifile <= (irank + h)) && ((irank + h) <= (7 + ifile)) {
+            ret += 1 << (square - 9 * (ifile - h))
         }
-        if h <= (rank + file) && (rank + file) <= (7 + h) {
-            ret += 1 << (square + 7 * (file - h))
+        if (h <= (irank + ifile)) && ((irank + ifile) <= (7 + h)) {
+            ret += 1 << (square + 7 * (ifile - h))
         }
     }
-    Bitboard(ret - 2 * square_board)
+    Bitboard(ret as u64 - 2 * square_board)
 }
 
 fn prune(board: Bitboard, rank: u8, file: u8) -> Bitboard {
@@ -93,12 +94,13 @@ fn prune(board: Bitboard, rank: u8, file: u8) -> Bitboard {
 
 fn rook_attacks(block: u8, rank: u8, file: u8) -> Bitboard {
     let mask = prune(rook_mask(rank, file), rank, file);
-
+    Bitboard::EMPTY
 }
 
 // Generating magic numbers
 
-pub fn magic_gen(square: u8, occ_mask: u64, is_bishop: bool, attempts: u64) -> BlackMagic {
+pub fn magic_gen(rank: u8, file: u8, is_bishop: bool, attempts: u64) -> BlackMagic {
+    let occ_mask = rook_mask(rank, file).value();
     let rel_bits = popcnt(occ_mask); // Counts number of relevant bits in mask
     let arr_size = 1 << rel_bits;
 
@@ -108,7 +110,7 @@ pub fn magic_gen(square: u8, occ_mask: u64, is_bishop: bool, attempts: u64) -> B
     let mut attacks : [u64; 4096];
 
     for i in 0..(1 << rel_bits) {
-        attacks[i] = if is_bishop {bmask())}
+        // attacks[i] = if is_bishop {bmask())}
     }
 
     // Init used attacks
@@ -128,11 +130,11 @@ pub fn magic_gen(square: u8, occ_mask: u64, is_bishop: bool, attempts: u64) -> B
         }
     }
 
-    let mut buffer = String::new();
+    /* let mut buffer = String::new();
     let stdin = io::stdin(); // We get `Stdin` here.
-    stdin.read_line(&mut buffer)?;
+    stdin.read_line(&mut buffer)?; */
 
-    println!("Failed to find magic number for bishop on square {} in {} attempts.", square, attempts);
+    println!("Failed to find magic number for bishop on square {} in {} attempts.", 8 * rank + file, attempts);
     panic!();
 
     BlackMagic::EMPTY
@@ -147,11 +149,8 @@ pub fn init_magic_numbers() -> (Vec::<BlackMagic>, Vec<BlackMagic>) {
     let (mut rank, mut file) : (u8, u8) = (0, 0);
     while rank < 8 {
         while file < 8 {
-            let square: u8 = 8 * rank + file;
-
-            bm_rook_table.push(magic_gen(square, rmask(rank, file).value(), false, attempts));
-            bm_bishop_table.push(magic_gen(square, rmask(rank, file).value(), false, attempts));
-
+            bm_rook_table.push(magic_gen(rank, file, false, attempts));
+            bm_bishop_table.push(magic_gen(rank, file, false, attempts));
             file += 1;
         }
         rank += 1;
@@ -171,11 +170,16 @@ pub fn init_magic_numbers() -> (Vec::<BlackMagic>, Vec<BlackMagic>) {
 
 #[cfg(test)]
 mod tests {
-    use crate::util::magic_gen::init_magic_numbers;
+    use crate::{board::bitboard::Bitboard, util::magic_gen::init_magic_numbers};
 
-    use super::BlackMagic;
+    use super::{bishop_mask};
 
-    #[test]
+    //#[test]
+    fn print_bishop_attack() {
+        Bitboard::print_bitboard(bishop_mask(4, 3));
+    }
+
+    //#[test]
     fn print_magics() {
         let (rook_magics, bishop_magics) = init_magic_numbers();
 
