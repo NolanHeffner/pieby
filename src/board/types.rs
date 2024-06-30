@@ -6,6 +6,7 @@ use crate::board::bitboard;
 
 use super::bitboard::Bitboard;
 
+#[derive(PartialEq)]
 pub struct PieceType(u8);
 
 impl PieceType {
@@ -91,17 +92,17 @@ impl Piece {
         &self.color
     }
 
-    /* pub fn value(&self) -> f64 {
-        match self.piece_type.0 {
+    pub fn value(&self) -> f64 {
+        match self.piece_type {
             PieceType::KING => 1000.0,
-            QUEEN => 9.0,
-            ROOK => 5.0,
-            BISHOP => 3.2,
-            KNIGHT => 3.0,
-            PAWN => 1.1,
+            PieceType::QUEEN => 9.0,
+            PieceType::ROOK => 5.0,
+            PieceType::BISHOP => 3.2,
+            PieceType::KNIGHT => 3.0,
+            PieceType::PAWN => 1.1,
             _ => 0.0,
         }
-    } */
+    }
 
 /*     fn get_ASCII(&self) -> &str {
         letter = match self.piece_type {

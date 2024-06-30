@@ -1,10 +1,10 @@
 ## Pieby Chess Engine
 
-I started this project with Matt because I wanted to have an engine to call my own, one in a variant that doesn't have nearly as much support, neither in infrastructure for the developers nor theory for players. This engine is still a huge WIP, so updating the README beyond this will have to wait.
+Pieby is a WIP A/B duck chess engine that intends to eventually implement a WDL eval based on ideas from the Lc0 team.
 
 | Options     | Description | Allowed range |
 |    :---:    |    :----:   |     :---:     |
-|     N/A     |     N/A     |      N/A      |
+|    Hash     |     N/A     |      N/A      |
 
 ## Current To-Do List
 
@@ -17,20 +17,14 @@ I started this project with Matt because I wanted to have an engine to call my o
 - [ ] Program PGN parsing
 - [ ] Add Hash to options
 - [ ] Add basic HCE evaluation so that thing functions on basic level
-- [ ] Implement attacks.rs for pawns, king, and queen
+- [X] Implement attacks.rs for pawns, king, and queen
 - [ ] Finish pseudo-legal and legal movegen
 
 ## Notable Features
 
 - Custom Zobrish hashing keys
-- Black magic bitboards for sliding attack generation
- - Custom black magic numbers
-
-## About the authors
-
-Matt and I are college students at Georgia Tech. We started this project as a way to get into Rust and machine learning. It's going... decent, so far. Hopefully one day we can update that to "It was a total success!"
-
-<img src="./authors.jpeg" width="275" alt="Photo of authors">
+- Black magic bitboards for sliding attack generation (WIP)
+ - Custom black magic numbers (WIP)
 
 ## Thanks and Acknowledgements
 
