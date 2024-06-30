@@ -1,0 +1,2 @@
+
+// We will most likely be using data from the Lc0 team, under the belief that a rising tide lifts all boats. However, we're as of yet unsure if we would need custom data to train a duck chess engine, so this file is left for posterity.

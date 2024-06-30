@@ -1,7 +1,10 @@
 
 use rand::{Error, Rng};
 
-use crate::board::{magic::BlackMagic, bitboard::{Bitboard, get_file, get_rank}};
+use crate::board::{
+    magic::BlackMagic, 
+    bitboard::{Bitboard, get_file, get_rank}
+};
 
 // Initialization data
 // Note as of 6/27: Arrays denote number of relevant bits - replaced by popcnt(occ_mask)

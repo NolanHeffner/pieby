@@ -24,6 +24,10 @@ impl PieceType {
         self.0 as usize
     }
 
+    pub fn id(&self) -> u8 {
+        self.0
+    }
+
     pub fn new(idx: usize) -> PieceType {
         PieceType(idx.try_into().unwrap())
     }

@@ -1,5 +1,8 @@
 
-use crate::board::{bitboard::Bitboard, board::Board};
+use crate::board::{
+    bitboard::Bitboard, 
+    board::Board
+};
 
 // Pseudo-legal move generation
 

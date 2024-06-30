@@ -1,6 +1,9 @@
 #![allow(unused)]
 
-use std::{fmt, ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Sub} };
+use std::{
+    ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Sub},
+    fmt
+};
 
 pub struct Bitboard(pub u64); // effectively 64 bits in binary
 

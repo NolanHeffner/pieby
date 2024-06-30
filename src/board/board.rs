@@ -1,6 +1,9 @@
 #![allow(unused, non_snake_case)]
 
-use super::{bitboard::Bitboard, types::{Color, Piece, PieceType}, zobrist};
+use super::{
+    bitboard::Bitboard, 
+    types::{Color, Piece, PieceType}, 
+    zobrist};
 
 pub struct PlayerInfo {
     color: Color,
@@ -40,16 +43,14 @@ impl Board {
         //self.clearSquare(startPos);
         for board in &self.pieces {
             if board.bit_at_pos(start_pos) == 1 {
-                if self.is_move_legal() {
-                    board.set_bit(start_pos, false);
-                    board.set_bit(end_pos, true);
-                }
+                board.set_bit(start_pos, false);
+                board.set_bit(end_pos, true);
             }
         }
     }
 
-    pub fn is_move_legal(&self) -> bool {
-        true
+    pub fn unmake_move(&mut self, start_pos: u8, end_pos: u8) {
+        self.make_move(end_pos, start_pos);
     }
     
     pub fn set_square(&mut self, square_pos: u8, piece: &Piece) {

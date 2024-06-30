@@ -30,7 +30,7 @@ I started this project with Matt because I wanted to have an engine to call my o
 
 Matt and I are college students at Georgia Tech. We started this project as a way to get into Rust and machine learning. It's going... decent, so far. Hopefully one day we can update that to "It was a total success!"
 
-<img src="./authors.jpeg" width="350" alt="Photo of authors">
+<img src="./authors.jpeg" width="275" alt="Photo of authors">
 
 ## Thanks and Acknowledgements
 

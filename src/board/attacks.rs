@@ -15,6 +15,11 @@ const NOT_A_FILE : u64 = 0xFEFEFEFEFEFEFEFE;
 const NOT_RANK_0 : u64 = 0xFFFFFFFFFFFFFF00;
 const NOT_RANK_7 : u64 = 0x00FFFFFFFFFFFFFF;
 
+/*
+* Each init_XXX_attacks function returns an array of attack bitboards which encode the squares that a piece "attacks", aka can move to.
+* Note that this does not care what the color of the attacked squares are; that has to be calculated in moveGen using move validation functions.
+*/
+
 const fn gen_sliding_attacks(square: u8, occ_bb: Bitboard) -> Bitboard {
     Bitboard::EMPTY
 }
