@@ -41,12 +41,12 @@ pub struct MoveGen<'a> {
     pins: Bitboard,
 }
 
-impl MoveGen<'a> {
+impl MoveGen<'_> {
 
     // Legal move generation
 
     pub fn gen_moves(&self) -> MoveList {
-        let mv_list : MoveList = MoveList::new();
+        let mut mv_list : MoveList = MoveList::new();
         for sq in 0..64 {
             match self.board.get_square(sq).get_type() {
                 &PieceType::PAWN => self.gen_pawn_moves(&mut mv_list, sq),
@@ -55,6 +55,7 @@ impl MoveGen<'a> {
                 &PieceType::ROOK => self.gen_rook_moves(&mut mv_list, sq),
                 &PieceType::QUEEN => self.gen_queen_moves(&mut mv_list, sq),
                 &PieceType::KING => self.gen_king_moves(&mut mv_list, sq),
+                _ => ()
             }
         }
         mv_list
@@ -98,21 +99,22 @@ impl MoveGen<'a> {
 
     pub fn gen_rook_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
         let turn = self.board.turn.index();
-        let attacks = attacks::SLIDING_ATTACKS[];
         let opponent = self.board.colors[1 - turn];
+        let attacks = attacks::sliding_attack(squarePos, self.board.occupied(), false);
         mv_list.readMoves(squarePos, (opponent & attacks).0, false);
     }
 
     pub fn gen_bishop_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
         let turn = self.board.turn.index();
-        let attacks = attacks::SLIDING_ATTACKS[];
         let opponent = self.board.colors[1 - turn];
+        let attacks = attacks::sliding_attack(squarePos, self.board.occupied(), true);
         mv_list.readMoves(squarePos, (opponent & attacks).0, false);
     }
 
     pub fn gen_queen_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
         let turn = self.board.turn.index();
-        let attacks =
+        let attacks = attacks::sliding_attack(squarePos, self.board.occupied(), true) |
+                                attacks::sliding_attack(squarePos, self.board.occupied(), false);
         let opponent = self.board.colors[1 - turn];
         mv_list.readMoves(squarePos, (opponent & attacks).0, false);
     }
@@ -131,6 +133,17 @@ impl MoveGen<'a> {
         }
         !filled
     }
+
+    pub fn gen_en_pessant(&self) {
+        
+    }
+
+    // Fill in movegen fields
+
+    pub fn init_checks(&mut self) {
+
+    }
+
 
     // Move Validation Section
 
@@ -168,7 +181,6 @@ impl MoveGen<'a> {
             _ => false,
         }
     }
-
 
     fn is_valid_pawn_move(&self, from: u8, to: u8) -> bool {
 

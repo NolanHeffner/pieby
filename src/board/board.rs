@@ -97,6 +97,14 @@ impl Board {
         false
     }
 
+    pub fn occupied(&self) -> Bitboard {
+        let mut occ = Bitboard::EMPTY;
+        for idx in 0..Color::COUNT {
+            occ |= self.colors[idx];
+        }
+        occ
+    }
+
 
     // Hashing
 

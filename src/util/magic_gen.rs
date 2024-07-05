@@ -144,7 +144,7 @@ pub fn magic_gen(rank: u8, file: u8, is_bishop: bool, attempts: u64) -> BlackMag
     let mut attacks : [u64; 4096] = gen_attacks(if is_bishop {bishop_mask} else {rook_mask}, rank, file);
 
     // Init used attacks
-    let mut used_attacks : [bool false; 4096];
+    let mut used_attacks : [u64; 4096];
 
     // Init attack mask for current piece
 

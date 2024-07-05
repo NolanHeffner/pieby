@@ -2,7 +2,7 @@
 
 use std::i128::MAX;
 use crate::board::bitboard::Bitboard;
-use super::bitboard::{get_file, get_rank};
+use super::{bitboard::{get_file, get_rank}, magic};
 
 pub const PAWN_ATTACKS: [[Bitboard; 64]; 2] = init_pawn_attacks();
 pub const KNIGHT_ATTACKS: [Bitboard; 64] = init_knight_attacks();
@@ -30,6 +30,12 @@ const fn init_sliding_attacks() -> [Bitboard; 88507] {
         square += 1;
     }
     [Bitboard::EMPTY; 88507]
+}
+
+pub fn sliding_attack(sq: u8, occ: Bitboard, is_bishop: bool) -> Bitboard {
+    let bm = if is_bishop {magic::BISHOP_BM[sq as usize]} else {magic::ROOK_BM[sq as usize]};
+    let index = bm.offset + (occ | bm.notmask) * bm.blackmagic >> bm.shift;
+    SLIDING_ATTACKS[index]
 }
 
 const fn init_pawn_attacks() -> [[Bitboard; 64]; 2] {
