@@ -64,6 +64,12 @@ impl Color {
     */
 }
 
+impl PartialEq for Color {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
 pub struct Piece {
     piece_type: PieceType,
     color: Color,

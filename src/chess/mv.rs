@@ -59,6 +59,10 @@ impl Move {
             true => PieceType::new((self.0 >> 13).into()),
         }
     }
+
+    pub fn unpack(&self) -> (u8, u8, bool, PieceType) {
+        (self.from(), self.to(), self.promo(), self.piece())
+    }
 }
 
 impl fmt::Display for Move {
