@@ -37,6 +37,8 @@ impl Board {
         }
     }
 
+    // Board manipulation
+
     pub fn make_move(&mut self, start_pos: u8, end_pos: u8) {
         //let piece : &Piece = self.getSquare(startPos).get_piece();
         //self.getSquare(endPos).set_piece(piece);
@@ -87,6 +89,12 @@ impl Board {
     pub fn get_file(file: u8) -> Bitboard {
         if file > 7 {return Bitboard::EMPTY}
         Bitboard(0x0101010101010101 << (file - 1))
+    }
+
+    // Querying information about board
+
+    pub fn is_game_over() -> bool {
+        false
     }
 
 

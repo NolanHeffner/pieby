@@ -93,11 +93,42 @@ fn prune(board: Bitboard, rank: u8, file: u8) -> Bitboard {
     board & !mask
 }
 
+// Carry-Rippler Trick
+
+struct CarryRippler {
+    set: u64,
+    subset: u64,
+}
+
+impl CarryRippler {
+    fn new(set: u64) -> Self {
+        CarryRippler {
+            set,
+            subset: 0,
+        }
+    }
+}
+
+impl Iterator for CarryRippler {
+    type Item = u64;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        Some(self.subset.wrapping_sub(self.set) & self.set)
+    }
+}
+
 // Generate attack boards
 
-fn rook_attacks(block: u8, rank: u8, file: u8) -> Bitboard {
-    let mask = prune(rook_mask(rank, file), rank, file);
-    Bitboard::EMPTY
+fn gen_attacks(mask: fn(u8, u8) -> Bitboard, rank: u8, file: u8) -> [u64; 4096] {
+    let mask = prune(mask(rank, file), rank, file);
+    let iter = CarryRippler::new(*mask);
+    let mut attacks = [0; 4096];
+
+    for subset in iter {
+        attacks[subset as usize] = subset;
+    }
+
+    attacks
 }
 
 // Generating magic numbers
@@ -110,14 +141,10 @@ pub fn magic_gen(rank: u8, file: u8, is_bishop: bool, attempts: u64) -> BlackMag
     // Initialize occupancies and attack tables
 
     let mut occupancies : [u64; 4096];
-    let mut attacks : [u64; 4096];
-
-    for i in 0..(1 << rel_bits) {
-        // attacks[i] = if is_bishop {bmask())}
-    }
+    let mut attacks : [u64; 4096] = gen_attacks(if is_bishop {bishop_mask} else {rook_mask}, rank, file);
 
     // Init used attacks
-    let mut used_attacks : [u64; 4096];
+    let mut used_attacks : [bool false; 4096];
 
     // Init attack mask for current piece
 
@@ -130,6 +157,7 @@ pub fn magic_gen(rank: u8, file: u8, is_bishop: bool, attempts: u64) -> BlackMag
         // Test magic against each attack pattern
         for _ in 0..(1 << rel_bits) {
             let shift = 64 - popcnt(unmask);
+
         }
     }
 
@@ -153,7 +181,7 @@ pub fn init_magic_numbers() -> (Vec::<BlackMagic>, Vec<BlackMagic>) {
     while rank < 8 {
         while file < 8 {
             bm_rook_table.push(magic_gen(rank, file, false, attempts));
-            bm_bishop_table.push(magic_gen(rank, file, false, attempts));
+            bm_bishop_table.push(magic_gen(rank, file, true, attempts));
             file += 1;
         }
         rank += 1;

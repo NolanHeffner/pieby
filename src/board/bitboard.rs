@@ -1,8 +1,7 @@
 #![allow(unused)]
 
 use std::{
-    ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Sub},
-    fmt
+    fmt, ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Deref, Not, Sub}
 };
 
 pub struct Bitboard(pub u64); // effectively 64 bits in binary
@@ -14,7 +13,7 @@ impl Bitboard {
 
     pub fn value(&self) -> u64 {
         self.0
-    }    
+    }
 
     // Bitwise board operations
 
@@ -42,10 +41,12 @@ impl Bitboard {
 
     pub fn mirror_horizontal(&mut self) {
         self.0 ^= 7;
+        // Does not work
     }
 
     pub fn mirror_vertical(&mut self) {
         self.0 ^= 56;
+        // Does not work
     }
 
     // Bit operations
@@ -74,6 +75,13 @@ impl Bitboard {
             }
             println!("{}\n", row);
         }
+    }
+}
+
+impl Deref for Bitboard {
+    type Target = u64;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
