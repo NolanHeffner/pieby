@@ -4,16 +4,15 @@ use std::i128::MAX;
 use crate::board::bitboard::Bitboard;
 use super::bitboard::{get_file, get_rank};
 
-const PAWN_ATTACKS: [[Bitboard; 64]; 2] = init_pawn_attacks();
-const KNIGHT_ATTACKS: [Bitboard; 64] = init_knight_attacks();
-const KING_ATTACKS: [Bitboard; 64] = init_king_attacks();
-
-const SLIDING_ATTACKS: [Bitboard; 88507] = init_sliding_attacks();
+pub const PAWN_ATTACKS: [[Bitboard; 64]; 2] = init_pawn_attacks();
+pub const KNIGHT_ATTACKS: [Bitboard; 64] = init_knight_attacks();
+pub const KING_ATTACKS: [Bitboard; 64] = init_king_attacks();
+pub const SLIDING_ATTACKS: [Bitboard; 88507] = init_sliding_attacks();
 
 const NOT_H_FILE : u64 = 0x7F7F7F7F7F7F7F7F;
 const NOT_A_FILE : u64 = 0xFEFEFEFEFEFEFEFE;
-const NOT_RANK_0 : u64 = 0xFFFFFFFFFFFFFF00;
-const NOT_RANK_7 : u64 = 0x00FFFFFFFFFFFFFF;
+pub const NOT_RANK_0 : u64 = 0xFFFFFFFFFFFFFF00;
+pub const NOT_RANK_7 : u64 = 0x00FFFFFFFFFFFFFF;
 
 /*
 * Each init_XXX_attacks function returns an array of attack bitboards which encode the squares that a piece "attacks", aka can move to.

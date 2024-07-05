@@ -1,37 +1,132 @@
 
-use crate::board::{bitboard::Bitboard, board::Board, types::{PieceType, Color}};
+use arrayvec::ArrayVec;
+
+use crate::board::{attacks, bitboard::{get_file, Bitboard}, board::Board, types::{Color, PieceType}};
 
 use super::mv::Move;
 
 // Infrastructure
 
-pub enum movegenType {
-    QUIET,
-    CAPTURE,
-    CHECK,
-    EVASION,
-    NONEVASION,
-    LEGAL
+struct MoveList(ArrayVec<Move, 256>);
+
+impl MoveList {
+    pub fn new() -> Self {
+        MoveList(ArrayVec::new())
+    }
+
+    pub fn clear(&mut self) {
+        self.0.clear();
+    } 
+
+    // Given a piece on square "from", and a list of legal positions represented via a bitboard "to", it appends all legal moves to MoveList
+    pub fn readMoves(&mut self, from: u8, mut to: u64, promo: bool) {
+        while to != 0 {
+            let to_current = to.trailing_zeros() as u8;
+            if promo {
+                for promo_piece in PieceType::PROMOTABLE {
+                    self.0.push(Move::new(from, to_current, true, promo_piece));
+                }
+            } else {
+                self.0.push(Move::new(from, to_current, false, PieceType::NONE));
+            }            
+            to &= to - 1;
+        }
+    }
 }
 
-impl Board {
+pub struct MoveGen<'a> {
+    board: &'a Board,
+    checkers: Bitboard,
+    threats: Bitboard,
+    pins: Bitboard,
+}
 
-    // Pseudo-legal move generation
-
-    pub fn gen_rook_moves(squarePos: u8) -> Bitboard {
-        Bitboard::EMPTY
-    }
-
-
-    pub fn gen_bishop_moves(squarePos: u8) -> Bitboard {
-        Bitboard::EMPTY
-    }
+impl MoveGen<'a> {
 
     // Legal move generation
 
+    pub fn gen_moves(&self) -> MoveList {
+        let mv_list : MoveList = MoveList::new();
+        for sq in 0..64 {
+            match self.board.get_square(sq).get_type() {
+                &PieceType::PAWN => self.gen_pawn_moves(&mut mv_list, sq),
+                &PieceType::KNIGHT => self.gen_knight_moves(&mut mv_list, sq),
+                &PieceType::BISHOP => self.gen_bishop_moves(&mut mv_list, sq),
+                &PieceType::ROOK => self.gen_rook_moves(&mut mv_list, sq),
+                &PieceType::QUEEN => self.gen_queen_moves(&mut mv_list, sq),
+                &PieceType::KING => self.gen_king_moves(&mut mv_list, sq),
+            }
+        }
+        mv_list
+    }
+    
+    pub fn gen_pawn_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+        let turn = self.board.turn.index();
+        
+        // Gen legal moves
+        let attacks = attacks::PAWN_ATTACKS[turn][squarePos as usize];
+        let opponent = self.board.colors[1 - turn];
+        let legal_attacks = opponent & attacks;
+
+        // Gen legal forward moves (non captures)
+        let file = (squarePos - squarePos % 8) / 8;
+        // Masking as below is unnecessary, as you should NEVER have a pawn on the 1st or 8th rank. This is kept for to make the engine more robust to errors during initial troubleshooting.
+        let masked_pos : u64 = (1 << squarePos) & 0x00FFFFFFFFFFFF00;
+        let mut forward : u64;
+        if turn == 0 {
+            forward = masked_pos << 8;
+            if file == 1 {
+                forward |= masked_pos << 16;
+            }
+        } else {
+            forward = masked_pos >> 8;
+            if file == 6 {
+                forward |= masked_pos >> 16;
+            }
+        }
+        let legal_forward = forward;
+
+        mv_list.readMoves(squarePos, legal_attacks.0 | legal_forward, (file == 1) | (file == 6));
+    }
+
+    pub fn gen_knight_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+        let turn = self.board.turn.index();
+        let attacks = attacks::KNIGHT_ATTACKS[squarePos as usize];
+        let opponent = self.board.colors[1 - turn];
+        mv_list.readMoves(squarePos, (opponent & attacks).0, false);
+    }
+
+    pub fn gen_rook_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+        let turn = self.board.turn.index();
+        let attacks = attacks::SLIDING_ATTACKS[];
+        let opponent = self.board.colors[1 - turn];
+        mv_list.readMoves(squarePos, (opponent & attacks).0, false);
+    }
+
+    pub fn gen_bishop_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+        let turn = self.board.turn.index();
+        let attacks = attacks::SLIDING_ATTACKS[];
+        let opponent = self.board.colors[1 - turn];
+        mv_list.readMoves(squarePos, (opponent & attacks).0, false);
+    }
+
+    pub fn gen_queen_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+        let turn = self.board.turn.index();
+        let attacks =
+        let opponent = self.board.colors[1 - turn];
+        mv_list.readMoves(squarePos, (opponent & attacks).0, false);
+    }
+
+    pub fn gen_king_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+        let turn = self.board.turn.index();
+        let attacks = attacks::KING_ATTACKS[squarePos as usize];
+        let opponent = self.board.colors[1 - turn];
+        mv_list.readMoves(squarePos, (opponent & attacks).0, false);
+    }
+
     pub fn gen_duck_moves(&self) -> Bitboard {
         let mut filled = Bitboard::EMPTY;
-        for occ_board in &self.pieces {
+        for occ_board in &self.board.pieces {
             filled |= Bitboard(occ_board.value());
         }
         !filled
@@ -49,12 +144,12 @@ impl Board {
         }
 
         // Get the piece at the 'from' square
-        let piece = self.get_square(from);
+        let piece = self.board.get_square(from);
         // Get the piece (if any) at the 'to' square
-        let target = self.get_square(to);
+        let target = self.board.get_square(to);
 
         // Check if the piece belongs to the current player
-        if *piece.get_color() != self.turn {
+        if *piece.get_color() != self.board.turn {
             return false; // It's not this player's turn, so the move is invalid
         }
         // Check if the target square is not occupied by a piece of the same color
@@ -77,8 +172,8 @@ impl Board {
 
     fn is_valid_pawn_move(&self, from: u8, to: u8) -> bool {
 
-        let piece = self.get_square(from);
-        let target = self.get_square(to);
+        let piece = self.board.get_square(from);
+        let target = self.board.get_square(to);
 
         // Determine the direction of movement based on pawn color
         let direction: i8 = if *piece.get_color() == Color::WHITE { 1 } else { -1 };
@@ -96,7 +191,7 @@ impl Board {
         if (from / 8 == 1 && *piece.get_color() == Color::WHITE) || (from / 8 == 6 && *piece.get_color() == Color::BLACK) {
             if diff == 16 * direction &&
                 *target.get_type() == PieceType::NONE &&
-                *self.get_square((from as i8 + 8 * direction) as u8).get_type() == PieceType::NONE {
+                *self.board.get_square((from as i8 + 8 * direction) as u8).get_type() == PieceType::NONE {
                 return true; // Moving forward two squares from starting position
             }
         }

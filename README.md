@@ -1,10 +1,18 @@
 ## Pieby Chess Engine
 
-Pieby is a WIP A/B duck chess engine that intends to eventually implement a WDL eval based on ideas from the Lc0 team.
+Pieby is a WIP A/B duck chess engine that intends to eventually implement 2 nets; a WDL evaluation net, and a smallnet which decides where to place the duck each turn. We will see how things develop.
 
 | Options     | Description | Allowed range |
 |    :---:    |    :----:   |     :---:     |
 |    Hash     |     N/A     |      N/A      |
+
+## Timeline
+
+Goals are:
+
+- Functional engine by Aug. 2024
+- Neural network implementation by Jan. 2025
+- Experiments with multiple networks completed by July 2025
 
 ## Current To-Do List
 
@@ -12,7 +20,7 @@ Pieby is a WIP A/B duck chess engine that intends to eventually implement a WDL 
 - [X] Finish programming Zobrist hashing
 - [X] Perform bitboard tests
 - [X] Integrate bitboards into position representation
-- [ ] Implement minimax / negamax search
+- [X] Finish skeleton of minimax / negamax search
 - [X] Program FEN parsing
 - [ ] Program PGN parsing
 - [ ] Add Hash to options

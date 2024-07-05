@@ -21,6 +21,8 @@ impl PieceType {
 
     pub const COUNT: usize = 7;
 
+    pub const PROMOTABLE : [PieceType; 4] = [PieceType::QUEEN, PieceType::ROOK, PieceType::BISHOP, PieceType::KNIGHT];
+
     pub fn index(&self) -> usize {
         self.0 as usize
     }

@@ -33,11 +33,11 @@ const PIECE_MASK : u16 = 111 << 13;
 
 impl Move {
 
-    pub fn new(from: u16, to: u16, promo: bool, promo_piece: PieceType) -> Self {
-        let bits : u16 = from 
-            | (to << 6)
-            | ((promo as u16) << 12)
-            | ((promo_piece.id() as u16) << 13);
+    pub fn new(from: u8, to: u8, promo: bool, promo_piece: PieceType) -> Self {
+        let bits : u16 = (from as u16)
+                        | ((to as u16)<< 6)
+                        | ((promo as u16) << 12)
+                        | ((promo_piece.id() as u16) << 13);
         Move(bits)
     }
 

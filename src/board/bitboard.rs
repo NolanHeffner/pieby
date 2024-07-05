@@ -4,6 +4,7 @@ use std::{
     fmt, ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Deref, Not, Sub}
 };
 
+#[derive(Copy, Clone)]
 pub struct Bitboard(pub u64); // effectively 64 bits in binary
 
 impl Bitboard {
@@ -82,6 +83,12 @@ impl Deref for Bitboard {
     type Target = u64;
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl PartialEq for Bitboard {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
     }
 }
 
