@@ -34,6 +34,18 @@ impl PieceType {
     pub fn new(idx: usize) -> PieceType {
         PieceType(idx.try_into().unwrap())
     }
+
+    pub fn value(&self) -> i16 {
+        match *self {
+            PieceType::KING => 1000,
+            PieceType::QUEEN => 900,
+            PieceType::ROOK => 500,
+            PieceType::BISHOP => 320,
+            PieceType::KNIGHT => 300,
+            PieceType::PAWN => 110,
+            _ => 0,
+        }
+    }
 }
 
 pub struct Color(u8);
@@ -100,16 +112,8 @@ impl Piece {
         &self.color
     }
 
-    pub fn value(&self) -> f64 {
-        match self.piece_type {
-            PieceType::KING => 1000.0,
-            PieceType::QUEEN => 9.0,
-            PieceType::ROOK => 5.0,
-            PieceType::BISHOP => 3.2,
-            PieceType::KNIGHT => 3.0,
-            PieceType::PAWN => 1.1,
-            _ => 0.0,
-        }
+    pub fn value(&self) -> i16 {
+        self.piece_type.value()
     }
 
 /*     fn get_ASCII(&self) -> &str {
