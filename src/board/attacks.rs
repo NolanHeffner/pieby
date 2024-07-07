@@ -33,8 +33,8 @@ const fn init_sliding_attacks() -> [Bitboard; 88507] {
 }
 
 pub fn sliding_attack(sq: u8, occ: Bitboard, is_bishop: bool) -> Bitboard {
-    let bm = if is_bishop {magic::BISHOP_BM[sq as usize]} else {magic::ROOK_BM[sq as usize]};
-    let index = bm.offset + (occ | bm.notmask) * bm.blackmagic >> bm.shift;
+    let bm = if is_bishop {&magic::BISHOP_BM[sq as usize]} else {&magic::ROOK_BM[sq as usize]};
+    let index = (bm.offset as u64 + (*occ | bm.notmask) * bm.blackmagic >> bm.shift) as usize;
     SLIDING_ATTACKS[index]
 }
 

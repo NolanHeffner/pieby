@@ -34,21 +34,20 @@ impl MoveList {
     }
 }
 
-pub struct MoveGen<'a> {
-    board: &'a Board,
+pub struct MoveGenInfo {
     checkers: Bitboard,
     threats: Bitboard,
     pins: Bitboard,
 }
 
-impl MoveGen<'_> {
+impl Board {
 
     // Legal move generation
 
     pub fn gen_moves(&self) -> MoveList {
         let mut mv_list : MoveList = MoveList::new();
         for sq in 0..64 {
-            match self.board.get_square(sq).get_type() {
+            match self.get_square(sq).get_type() {
                 &PieceType::PAWN => self.gen_pawn_moves(&mut mv_list, sq),
                 &PieceType::KNIGHT => self.gen_knight_moves(&mut mv_list, sq),
                 &PieceType::BISHOP => self.gen_bishop_moves(&mut mv_list, sq),
@@ -62,11 +61,11 @@ impl MoveGen<'_> {
     }
     
     pub fn gen_pawn_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
-        let turn = self.board.turn.index();
+        let turn = self.turn.index();
         
         // Gen legal moves
         let attacks = attacks::PAWN_ATTACKS[turn][squarePos as usize];
-        let opponent = self.board.colors[1 - turn];
+        let opponent = self.colors[1 - turn];
         let legal_attacks = opponent & attacks;
 
         // Gen legal forward moves (non captures)
@@ -91,44 +90,44 @@ impl MoveGen<'_> {
     }
 
     pub fn gen_knight_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
-        let turn = self.board.turn.index();
+        let turn = self.turn.index();
         let attacks = attacks::KNIGHT_ATTACKS[squarePos as usize];
-        let opponent = self.board.colors[1 - turn];
+        let opponent = self.colors[1 - turn];
         mv_list.readMoves(squarePos, (opponent & attacks).0, false);
     }
 
     pub fn gen_rook_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
-        let turn = self.board.turn.index();
-        let opponent = self.board.colors[1 - turn];
-        let attacks = attacks::sliding_attack(squarePos, self.board.occupied(), false);
+        let turn = self.turn.index();
+        let opponent = self.colors[1 - turn];
+        let attacks = attacks::sliding_attack(squarePos, self.occupied(), false);
         mv_list.readMoves(squarePos, (opponent & attacks).0, false);
     }
 
     pub fn gen_bishop_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
-        let turn = self.board.turn.index();
-        let opponent = self.board.colors[1 - turn];
-        let attacks = attacks::sliding_attack(squarePos, self.board.occupied(), true);
+        let turn = self.turn.index();
+        let opponent = self.colors[1 - turn];
+        let attacks = attacks::sliding_attack(squarePos, self.occupied(), true);
         mv_list.readMoves(squarePos, (opponent & attacks).0, false);
     }
 
     pub fn gen_queen_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
-        let turn = self.board.turn.index();
-        let attacks = attacks::sliding_attack(squarePos, self.board.occupied(), true) |
-                                attacks::sliding_attack(squarePos, self.board.occupied(), false);
-        let opponent = self.board.colors[1 - turn];
+        let turn = self.turn.index();
+        let attacks = attacks::sliding_attack(squarePos, self.occupied(), true) |
+                                attacks::sliding_attack(squarePos, self.occupied(), false);
+        let opponent = self.colors[1 - turn];
         mv_list.readMoves(squarePos, (opponent & attacks).0, false);
     }
 
     pub fn gen_king_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
-        let turn = self.board.turn.index();
+        let turn = self.turn.index();
         let attacks = attacks::KING_ATTACKS[squarePos as usize];
-        let opponent = self.board.colors[1 - turn];
+        let opponent = self.colors[1 - turn];
         mv_list.readMoves(squarePos, (opponent & attacks).0, false);
     }
 
     pub fn gen_duck_moves(&self) -> Bitboard {
         let mut filled = Bitboard::EMPTY;
-        for occ_board in &self.board.pieces {
+        for occ_board in &self.pieces {
             filled |= Bitboard(occ_board.value());
         }
         !filled
@@ -157,12 +156,12 @@ impl MoveGen<'_> {
         }
 
         // Get the piece at the 'from' square
-        let piece = self.board.get_square(from);
+        let piece = self.get_square(from);
         // Get the piece (if any) at the 'to' square
-        let target = self.board.get_square(to);
+        let target = self.get_square(to);
 
         // Check if the piece belongs to the current player
-        if *piece.get_color() != self.board.turn {
+        if *piece.get_color() != self.turn {
             return false; // It's not this player's turn, so the move is invalid
         }
         // Check if the target square is not occupied by a piece of the same color
@@ -184,8 +183,8 @@ impl MoveGen<'_> {
 
     fn is_valid_pawn_move(&self, from: u8, to: u8) -> bool {
 
-        let piece = self.board.get_square(from);
-        let target = self.board.get_square(to);
+        let piece = self.get_square(from);
+        let target = self.get_square(to);
 
         // Determine the direction of movement based on pawn color
         let direction: i8 = if *piece.get_color() == Color::WHITE { 1 } else { -1 };
@@ -203,7 +202,7 @@ impl MoveGen<'_> {
         if (from / 8 == 1 && *piece.get_color() == Color::WHITE) || (from / 8 == 6 && *piece.get_color() == Color::BLACK) {
             if diff == 16 * direction &&
                 *target.get_type() == PieceType::NONE &&
-                *self.board.get_square((from as i8 + 8 * direction) as u8).get_type() == PieceType::NONE {
+                *self.get_square((from as i8 + 8 * direction) as u8).get_type() == PieceType::NONE {
                 return true; // Moving forward two squares from starting position
             }
         }
@@ -218,4 +217,10 @@ impl MoveGen<'_> {
         // If none of the above conditions are met, the move is invalid
         false
     }
+
+    fn is_valid_bishop_move(&self, from: u8, to: u8) -> bool {true}
+    fn is_valid_knight_move(&self, from: u8, to: u8) -> bool {true}
+    fn is_valid_rook_move(&self, from: u8, to: u8) -> bool {true}
+    fn is_valid_queen_move(&self, from: u8, to: u8) -> bool {true}
+    fn is_valid_king_move(&self, from: u8, to: u8) -> bool {true}
 }

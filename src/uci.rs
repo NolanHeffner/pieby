@@ -15,8 +15,8 @@ pub struct UCIEngine {
 }
 
 pub struct Options {
-    hash: i32,
-    threads: i8,
+    hash: u32,
+    threads: u8,
 }
 
 impl UCIEngine {
@@ -28,7 +28,7 @@ impl UCIEngine {
             engine_version,
             options: Options {
                 hash: 0,
-                threads: 0,
+                threads: 1,
             },
         }
     }

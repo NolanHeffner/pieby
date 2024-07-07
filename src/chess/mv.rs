@@ -1,6 +1,6 @@
-use std::fmt;
 
-use crate::board::types::{Piece, PieceType};
+use std::fmt;
+use crate::board::types::PieceType;
 
 /*
 Structure of move object:

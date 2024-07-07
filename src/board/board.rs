@@ -1,9 +1,14 @@
 #![allow(unused, non_snake_case)]
 
-use super::{
-    bitboard::Bitboard, 
-    types::{Color, Piece, PieceType}, 
-    zobrist};
+use crate::{
+    board::{
+        bitboard::Bitboard, 
+        types::{Color, Piece, PieceType}, 
+        zobrist
+    }, chess::{
+        movegen::{self, MoveGenInfo}, mv::Move
+    }  
+};
 
 pub struct PlayerInfo {
     color: Color,
@@ -12,6 +17,7 @@ pub struct PlayerInfo {
     increment: f64,
 }
 
+#[derive(Clone)]
 pub struct Board {
     // a1 -> 0, h1 -> 7, a8 -> 56, h8 -> 63
     // board: [[Square; 8]; 8],
@@ -21,6 +27,7 @@ pub struct Board {
     pub castling: [bool; 4], // order KQkq
     // attackBitboards: [Bitboards],
     pub en_pessant: u8, // Defaults to u8::max if impossible, otherwise 0-63 for en-pessantable square
+    info: MoveGenInfo,
     hash: u64,
 }
 
@@ -33,17 +40,32 @@ impl Board {
             turn: Color::NONE,
             castling: [false; 4],
             en_pessant: u8::MAX,
+            info: MoveGenInfo::EMPTY,
             hash: 0,
         }
     }
 
     // Board manipulation
 
-    pub fn make_move(&mut self, start_pos: u8, end_pos: u8) {
-        //let piece : &Piece = self.getSquare(startPos).get_piece();
-        //self.getSquare(endPos).set_piece(piece);
-        //self.clearSquare(startPos);
-        for board in &self.pieces {
+    pub fn make_move(&mut self, mv: Move) {
+        // This function does not check for legality
+        let (start_pos, end_pos, promo, promo_piece) = mv.unpack();
+
+        // Pieces bitboard update
+        if promo {
+            self.pieces[PieceType::PAWN.index()].set_bit(start_pos, false);
+            self.pieces[promo_piece.index()].set_bit(end_pos, true);
+        } else {
+            for board in self.pieces {
+                if board.bit_at_pos(start_pos) == 1 {
+                    board.set_bit(start_pos, false);
+                    board.set_bit(end_pos, true);
+                }
+            }
+        }
+
+        // Color bitboard update
+        for board in self.colors {
             if board.bit_at_pos(start_pos) == 1 {
                 board.set_bit(start_pos, false);
                 board.set_bit(end_pos, true);
@@ -51,8 +73,31 @@ impl Board {
         }
     }
 
-    pub fn unmake_move(&mut self, start_pos: u8, end_pos: u8) {
-        self.make_move(end_pos, start_pos);
+    pub fn unmake_move(&mut self, mv: Move) {
+        // NOTE: Lots of redundant code with board.make_move(). Clean up eventually
+
+        let (start_pos, end_pos, promo, promo_piece) = mv.unpack();
+
+        // Pieces bitboard update
+        if promo {
+            self.pieces[promo_piece.index()].set_bit(end_pos, false);
+            self.pieces[PieceType::PAWN.index()].set_bit(start_pos, true);
+        } else {
+            for board in self.pieces {
+                if board.bit_at_pos(end_pos) == 1 {
+                    board.set_bit(end_pos, false);
+                    board.set_bit(start_pos, true);
+                }
+            }
+        }
+
+        // Color bitboard update
+        for board in self.colors {
+            if board.bit_at_pos(end_pos) == 1 {
+                board.set_bit(end_pos, false);
+                board.set_bit(start_pos, true);
+            }
+        }
     }
     
     pub fn set_square(&mut self, square_pos: u8, piece: &Piece) {
@@ -105,7 +150,6 @@ impl Board {
         occ
     }
 
-
     // Hashing
 
     pub fn generate_zobrist_hashing(&mut self) {
@@ -119,7 +163,6 @@ impl Board {
             self.hash ^= zobrist::white_to_move_key();
         }
         // Add hashing for pieces below
-
 
     }
 

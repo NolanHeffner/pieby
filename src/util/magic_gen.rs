@@ -94,6 +94,7 @@ fn prune(board: Bitboard, rank: u8, file: u8) -> Bitboard {
 }
 
 // Carry-Rippler Trick
+// Iterates over all subsets of a mask u64 to produce all blocking configurations
 
 struct CarryRippler {
     set: u64,

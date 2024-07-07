@@ -5,3 +5,4 @@ pub mod movegen;
 pub mod transposition_table;
 pub mod mv;
 pub mod perft;
+pub mod timeman;

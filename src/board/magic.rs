@@ -1,19 +1,11 @@
 
 use std::fmt;
-use crate::board::bitboard::Bitboard;
-
-struct MagicBitboard {
-    //toSqBB: []Bitboard, // Currently using Go notation, need to fix
-    innerBB: Bitboard,
-    magic: u64,
-    shift: u32
-}
 
 pub struct BlackMagic {
     pub offset: usize,  // index of attack_table in array
     pub notmask: u64,  // masking relevant squares (minus outer squares)
-    pub shift: u8, // Number of bits in blackmagic
     pub blackmagic: u64, // black magic multiplication factor
+    pub shift: u8, // Number of bits in blackmagic
 }
 
 impl BlackMagic {
@@ -46,6 +38,9 @@ mod tests {
         println!("{}", TEST_BM_STRUCT);
     }
 }
+
+pub const ROOK_BM : [BlackMagic; 64] = [BlackMagic::EMPTY; 64];
+pub const BISHOP_BM : [BlackMagic; 64] = [BlackMagic::EMPTY; 64];
 
 /* Black magic implementation reference
 

@@ -48,6 +48,7 @@ impl PieceType {
     }
 }
 
+#[derive(Clone)]
 pub struct Color(u8);
 
 impl Color {
