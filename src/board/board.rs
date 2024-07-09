@@ -42,7 +42,7 @@ impl Board {
             en_pessant: u8::MAX,
             info: MoveGenInfo::EMPTY,
             hash: 0,
-        }
+        }.init_movegen()
     }
 
     // Board manipulation

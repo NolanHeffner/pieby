@@ -7,7 +7,7 @@ use super::mv::Move;
 
 // Infrastructure
 
-struct MoveList(ArrayVec<Move, 256>);
+pub struct MoveList(ArrayVec<Move, 256>);
 
 impl MoveList {
     pub fn new() -> Self {
@@ -32,15 +32,42 @@ impl MoveList {
             to &= to - 1;
         }
     }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
 }
 
+impl IntoIterator for MoveList {
+    type Item = Move;
+    type IntoIter = arrayvec::IntoIter<Self::Item, 256>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+#[derive(Clone)]
 pub struct MoveGenInfo {
     checkers: Bitboard,
     threats: Bitboard,
     pins: Bitboard,
 }
 
+impl MoveGenInfo {
+    pub const EMPTY : MoveGenInfo = MoveGenInfo {
+        checkers: Bitboard::EMPTY,
+        threats: Bitboard::EMPTY,
+        pins: Bitboard::EMPTY,
+    };
+}
+
 impl Board {
+
+    // Calculate checks, threats, and pins
+
+    pub fn init_movegen(self) -> Self {
+        self
+    }
 
     // Legal move generation
 
@@ -89,40 +116,40 @@ impl Board {
         mv_list.readMoves(squarePos, legal_attacks.0 | legal_forward, (file == 1) | (file == 6));
     }
 
-    pub fn gen_knight_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+    pub fn gen_knight_moves(&self, mv_list: &mut MoveList, square_pos: u8) {
         let turn = self.turn.index();
-        let attacks = attacks::KNIGHT_ATTACKS[squarePos as usize];
+        let attacks = attacks::KNIGHT_ATTACKS[square_pos as usize];
         let opponent = self.colors[1 - turn];
-        mv_list.readMoves(squarePos, (opponent & attacks).0, false);
+        mv_list.readMoves(square_pos, (opponent & attacks).0, false);
     }
 
-    pub fn gen_rook_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+    pub fn gen_rook_moves(&self, mv_list: &mut MoveList, square_pos: u8) {
         let turn = self.turn.index();
         let opponent = self.colors[1 - turn];
-        let attacks = attacks::sliding_attack(squarePos, self.occupied(), false);
-        mv_list.readMoves(squarePos, (opponent & attacks).0, false);
+        let attacks = attacks::sliding_attack(square_pos, self.occupied(), false);
+        mv_list.readMoves(square_pos, (opponent & attacks).0, false);
     }
 
-    pub fn gen_bishop_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+    pub fn gen_bishop_moves(&self, mv_list: &mut MoveList, square_pos: u8) {
         let turn = self.turn.index();
         let opponent = self.colors[1 - turn];
-        let attacks = attacks::sliding_attack(squarePos, self.occupied(), true);
-        mv_list.readMoves(squarePos, (opponent & attacks).0, false);
+        let attacks = attacks::sliding_attack(square_pos, self.occupied(), true);
+        mv_list.readMoves(square_pos, (opponent & attacks).0, false);
     }
 
-    pub fn gen_queen_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+    pub fn gen_queen_moves(&self, mv_list: &mut MoveList, square_pos: u8) {
         let turn = self.turn.index();
-        let attacks = attacks::sliding_attack(squarePos, self.occupied(), true) |
-                                attacks::sliding_attack(squarePos, self.occupied(), false);
+        let attacks = attacks::sliding_attack(square_pos, self.occupied(), true) |
+                                attacks::sliding_attack(square_pos, self.occupied(), false);
         let opponent = self.colors[1 - turn];
-        mv_list.readMoves(squarePos, (opponent & attacks).0, false);
+        mv_list.readMoves(square_pos, (opponent & attacks).0, false);
     }
 
-    pub fn gen_king_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+    pub fn gen_king_moves(&self, mv_list: &mut MoveList, square_pos: u8) {
         let turn = self.turn.index();
-        let attacks = attacks::KING_ATTACKS[squarePos as usize];
+        let attacks = attacks::KING_ATTACKS[square_pos as usize];
         let opponent = self.colors[1 - turn];
-        mv_list.readMoves(squarePos, (opponent & attacks).0, false);
+        mv_list.readMoves(square_pos, (opponent & attacks).0, false);
     }
 
     pub fn gen_duck_moves(&self) -> Bitboard {

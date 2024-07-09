@@ -118,9 +118,9 @@ impl Iterator for CarryRippler {
     }
 }
 
-// Generate attack boards
+// Generate occupancy boards
 
-fn gen_attacks(mask: fn(u8, u8) -> Bitboard, rank: u8, file: u8) -> [u64; 4096] {
+fn gen_occs(mask: fn(u8, u8) -> Bitboard, rank: u8, file: u8) -> [u64; 4096] {
     let mask = prune(mask(rank, file), rank, file);
     let iter = CarryRippler::new(*mask);
     let mut attacks = [0; 4096];
@@ -128,48 +128,100 @@ fn gen_attacks(mask: fn(u8, u8) -> Bitboard, rank: u8, file: u8) -> [u64; 4096] 
     for subset in iter {
         attacks[subset as usize] = subset;
     }
-
     attacks
+}
+
+// Generate attack boards
+
+fn gen_rook_attack(sq: u8, block: u64) -> u64 {
+    let mut result = 0u64;
+    let rank : u8 = sq / 8;
+    let file : u8 = sq % 8;
+
+    
+
+    return result;
+}
+  
+fn gen_bishop_attack(sq: u8, block: u64) -> u64 {
+    let mut result = 0u64;
+    let rank : u8 = sq / 8;
+    let file : u8 = sq % 8;
+    
+    return result;
+}
+
+fn gen_attacks(sq: u8, occ: [u64; 4096], is_bishop: bool) -> [u64; 4096] {
+    let mut attacks = [0; 4096];
+    for idx in 0..4096 {
+        let block = occ[idx];
+        attacks[idx] = if is_bishop {gen_bishop_attack(sq, block)} else {gen_rook_attack(sq, block)};
+    }
+    attacks
+}
+
+// Hashing used_attack indices
+// Credit to Chess Programming Wiki "Looking for Magics" page for transform() hashing function
+
+fn transform(block: u64, magic: u64, bits: u8) -> u64 {
+    (block * magic) ^ ((block >> 32) * (magic >> 32)) >> 32
 }
 
 // Generating magic numbers
 
-pub fn magic_gen(rank: u8, file: u8, is_bishop: bool, attempts: u64) -> BlackMagic {
+pub fn magic_gen(rank: u8, file: u8, is_bishop: bool, attempts: u64) -> Option<BlackMagic> {
     let occ_mask = rook_mask(rank, file).value();
     let rel_bits = popcnt(occ_mask); // Counts number of relevant bits in mask
     let arr_size = 1 << rel_bits;
 
     // Initialize occupancies and attack tables
 
-    let mut occupancies : [u64; 4096];
-    let mut attacks : [u64; 4096] = gen_attacks(if is_bishop {bishop_mask} else {rook_mask}, rank, file);
+    let occupancies : [u64; 4096] = gen_occs(if is_bishop {bishop_mask} else {rook_mask}, rank, file);
+    let attacks : [u64; 4096] = gen_attacks(8 * rank + file, occupancies, is_bishop);
 
     // Init used attacks
-    let mut used_attacks : [u64; 4096];
+    let mut used_attacks : [u64; 4096] = [0; 4096];
 
     // Init attack mask for current piece
 
-    let unmask = !occ_mask;
+    let notmask = !occ_mask;
+    let shift = 64 - popcnt(notmask);
     for _ in 0..attempts {
         // if count_1s((mask * magic) & 0xFF00000000000000) < 6 {continue};
-        let candidate_magic: u64 = gen_few_bit_u64();
-        let mut fail = false;
+        let candidate_magic = gen_few_bit_u64();
 
         // Test magic against each attack pattern
-        for _ in 0..(1 << rel_bits) {
-            let shift = 64 - popcnt(unmask);
 
+        let mut fail = false;
+        used_attacks.fill(0);
+
+        for (i, &occ) in occupancies.iter().enumerate() {
+            let index = transform(occ, candidate_magic, rel_bits) as usize;
+            if used_attacks[index] == 0 || used_attacks[index] == attacks[i] {
+                used_attacks[index] = attacks[i];
+            } else {
+                fail = true;
+                continue;
+            }
+        }
+
+        if !fail {
+            return Some(BlackMagic {
+                offset: 0,
+                notmask,
+                blackmagic: candidate_magic,
+                shift,
+            })
         }
     }
 
+    return None;
     /* let mut buffer = String::new();
     let stdin = io::stdin(); // We get `Stdin` here.
     stdin.read_line(&mut buffer)?; */
-
     println!("Failed to find magic number for bishop on square {} in {} attempts.", 8 * rank + file, attempts);
     panic!();
-
-    BlackMagic::EMPTY
+    
 }
 
 pub fn init_magic_numbers() -> (Vec::<BlackMagic>, Vec<BlackMagic>) {
@@ -181,8 +233,14 @@ pub fn init_magic_numbers() -> (Vec::<BlackMagic>, Vec<BlackMagic>) {
     let (mut rank, mut file) : (u8, u8) = (0, 0);
     while rank < 8 {
         while file < 8 {
-            bm_rook_table.push(magic_gen(rank, file, false, attempts));
-            bm_bishop_table.push(magic_gen(rank, file, true, attempts));
+            bm_rook_table.push(magic_gen(rank, file, false, attempts).unwrap_or_else(|| {
+                println!("Error calculating rook magic number at rank {rank} and file {file}.");
+                BlackMagic::EMPTY
+            }));
+            bm_bishop_table.push(magic_gen(rank, file, true, attempts).unwrap_or_else(|| {
+                println!("Error calculating bishop magic number at rank {rank} and file {file}.");
+                BlackMagic::EMPTY
+            }));
             file += 1;
         }
         rank += 1;
