@@ -47,13 +47,14 @@ impl Search {
         let stopped = false;
         let mut eval = 0;
         while !stopped {
-            eval = Self::alphabeta(board, depth, is_white);
+            eval = Self::alphabeta(board, depth);
             depth += 1;
         }
     }
 
-    fn alphabeta(board: &mut Board, depth: u8, is_white: bool) -> i16 {
-        minimax(board, depth, ...., is_white)
+    fn alphabeta(board: &mut Board, depth: u8) -> i16 {
+        let is_maxim = board.turn.is_maxim().unwrap_or_else(|| panic!());
+        Self::minimax(board, depth, i16::MIN, i16::MAX, is_maxim)
     }
 
     fn minimax(board: &mut Board, depth: u8, alpha: i16, beta: i16, is_maxim: bool) -> i16 {
@@ -67,15 +68,17 @@ impl Search {
 
         // Movegen + move ordering
         moves = Self::order_moves(board, moves);
-
-        let is_maxim = board.
+        
         if is_maxim {
             let mut max_eval = i16::MIN;
             for mv in moves {
                 board.make_move(mv);
                 let eval = Self::minimax(board, depth - 1, alpha, beta, false);
-                max_eval = max(alpha, eval);
+                max_eval = max(max_eval, eval);
                 board.unmake_move(mv);
+                if beta <= max(alpha, eval) {
+                    break
+                }
             }
             return max_eval
         } else {
@@ -83,8 +86,11 @@ impl Search {
             for mv in moves {
                 board.make_move(mv);
                 let eval = Self::minimax(board, depth - 1, alpha, beta, true);
-                min_eval = min(alpha, eval);
+                min_eval = min(min_eval, eval);
                 board.unmake_move(mv);
+                if min(beta, eval) <= alpha {
+                    break
+                }
             }
             return min_eval
         }

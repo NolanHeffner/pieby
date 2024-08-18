@@ -72,6 +72,14 @@ impl Color {
         self.0 as usize
     }
 
+    pub fn is_maxim(&self) -> Option<bool> {
+        match self.0 {
+            0 => Some(true),
+            1 => Some(false),
+            _ => None,
+        }
+    }
+
     /*
     pub fn index(&self) -> usize {
         *self as usize

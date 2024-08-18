@@ -1,7 +1,7 @@
 
 use arrayvec::ArrayVec;
 
-use crate::board::{attacks, bitboard::{get_file, Bitboard}, board::Board, types::{Color, PieceType}};
+use crate::board::{attacks, bitboard::Bitboard, board::Board, types::{Color, PieceType}};
 
 use super::mv::Move;
 
@@ -10,31 +10,50 @@ use super::mv::Move;
 pub struct MoveList(ArrayVec<Move, 256>);
 
 impl MoveList {
+
     pub fn new() -> Self {
         MoveList(ArrayVec::new())
     }
 
-    pub fn clear(&mut self) {
-        self.0.clear();
-    } 
-
     // Given a piece on square "from", and a list of legal positions represented via a bitboard "to", it appends all legal moves to MoveList
-    pub fn readMoves(&mut self, from: u8, mut to: u64, promo: bool) {
+    pub fn read_moves(from: u8, mut to: u64, promo: bool) -> Self {
+        let mut move_list = MoveList::new();
         while to != 0 {
             let to_current = to.trailing_zeros() as u8;
             if promo {
                 for promo_piece in PieceType::PROMOTABLE {
-                    self.0.push(Move::new(from, to_current, true, promo_piece));
+                    move_list.0.push(Move::new(from, to_current, true, promo_piece));
                 }
             } else {
-                self.0.push(Move::new(from, to_current, false, PieceType::NONE));
+                move_list.0.push(Move::new(from, to_current, false, PieceType::NONE));
             }            
             to &= to - 1;
         }
+        move_list
+    }
+
+    pub fn clear(&mut self) {
+        self.0.clear();
+    }
+
+    pub fn zip(&mut self, other: MoveList) -> ArrayVec<(Move, Move), 65536> {
+        let mut zipped_list = ArrayVec::<(Move, Move), 65536>::new();
+        for i in 0..256 {
+            for j in 0..256 {
+                zipped_list[256 * i + j] = (self.0[i], other.0[j])
+            }
+        }
+        zipped_list
     }
 
     pub fn len(&self) -> usize {
         self.0.len()
+    }
+
+    pub fn append(&mut self, other: MoveList) {
+        for el in other {
+            self.0.push(el);
+        }
     }
 }
 
@@ -74,31 +93,31 @@ impl Board {
     pub fn gen_moves(&self) -> MoveList {
         let mut mv_list : MoveList = MoveList::new();
         for sq in 0..64 {
-            match self.get_square(sq).get_type() {
-                &PieceType::PAWN => self.gen_pawn_moves(&mut mv_list, sq),
-                &PieceType::KNIGHT => self.gen_knight_moves(&mut mv_list, sq),
-                &PieceType::BISHOP => self.gen_bishop_moves(&mut mv_list, sq),
-                &PieceType::ROOK => self.gen_rook_moves(&mut mv_list, sq),
-                &PieceType::QUEEN => self.gen_queen_moves(&mut mv_list, sq),
-                &PieceType::KING => self.gen_king_moves(&mut mv_list, sq),
-                _ => ()
-            }
+            mv_list.append(match self.get_square(sq).get_type() {
+                &PieceType::PAWN => self.gen_pawn_moves(sq),
+                &PieceType::KNIGHT => self.gen_knight_moves(sq),
+                &PieceType::BISHOP => self.gen_bishop_moves(sq),
+                &PieceType::ROOK => self.gen_rook_moves(sq),
+                &PieceType::QUEEN => self.gen_queen_moves(sq),
+                &PieceType::KING => self.gen_king_moves(sq),
+                _ => MoveList::new(),
+            });
         }
         mv_list
     }
     
-    pub fn gen_pawn_moves(&self, mv_list: &mut MoveList, squarePos: u8) {
+    pub fn gen_pawn_moves(&self, square_pos: u8) -> MoveList {
         let turn = self.turn.index();
         
         // Gen legal moves
-        let attacks = attacks::PAWN_ATTACKS[turn][squarePos as usize];
+        let attacks = attacks::PAWN_ATTACKS[turn][square_pos as usize];
         let opponent = self.colors[1 - turn];
         let legal_attacks = opponent & attacks;
 
         // Gen legal forward moves (non captures)
-        let file = (squarePos - squarePos % 8) / 8;
+        let file = (square_pos - square_pos % 8) / 8;
         // Masking as below is unnecessary, as you should NEVER have a pawn on the 1st or 8th rank. This is kept for to make the engine more robust to errors during initial troubleshooting.
-        let masked_pos : u64 = (1 << squarePos) & 0x00FFFFFFFFFFFF00;
+        let masked_pos : u64 = (1 << square_pos) & 0x00FFFFFFFFFFFF00;
         let mut forward : u64;
         if turn == 0 {
             forward = masked_pos << 8;
@@ -113,43 +132,43 @@ impl Board {
         }
         let legal_forward = forward;
 
-        mv_list.readMoves(squarePos, legal_attacks.0 | legal_forward, (file == 1) | (file == 6));
+        MoveList::read_moves(square_pos, legal_attacks.0 | legal_forward, (file == 1) | (file == 6))
     }
 
-    pub fn gen_knight_moves(&self, mv_list: &mut MoveList, square_pos: u8) {
+    pub fn gen_knight_moves(&self, square_pos: u8) -> MoveList {
         let turn = self.turn.index();
         let attacks = attacks::KNIGHT_ATTACKS[square_pos as usize];
         let opponent = self.colors[1 - turn];
-        mv_list.readMoves(square_pos, (opponent & attacks).0, false);
+        MoveList::read_moves(square_pos, (opponent & attacks).0, false)
     }
 
-    pub fn gen_rook_moves(&self, mv_list: &mut MoveList, square_pos: u8) {
+    pub fn gen_rook_moves(&self, square_pos: u8) -> MoveList  {
         let turn = self.turn.index();
         let opponent = self.colors[1 - turn];
         let attacks = attacks::sliding_attack(square_pos, self.occupied(), false);
-        mv_list.readMoves(square_pos, (opponent & attacks).0, false);
+        MoveList::read_moves(square_pos, (opponent & attacks).0, false)
     }
 
-    pub fn gen_bishop_moves(&self, mv_list: &mut MoveList, square_pos: u8) {
+    pub fn gen_bishop_moves(&self, square_pos: u8) -> MoveList {
         let turn = self.turn.index();
         let opponent = self.colors[1 - turn];
         let attacks = attacks::sliding_attack(square_pos, self.occupied(), true);
-        mv_list.readMoves(square_pos, (opponent & attacks).0, false);
+        MoveList::read_moves(square_pos, (opponent & attacks).0, false)
     }
 
-    pub fn gen_queen_moves(&self, mv_list: &mut MoveList, square_pos: u8) {
+    pub fn gen_queen_moves(&self, square_pos: u8) -> MoveList {
         let turn = self.turn.index();
         let attacks = attacks::sliding_attack(square_pos, self.occupied(), true) |
                                 attacks::sliding_attack(square_pos, self.occupied(), false);
         let opponent = self.colors[1 - turn];
-        mv_list.readMoves(square_pos, (opponent & attacks).0, false);
+        MoveList::read_moves(square_pos, (opponent & attacks).0, false)
     }
 
-    pub fn gen_king_moves(&self, mv_list: &mut MoveList, square_pos: u8) {
+    pub fn gen_king_moves(&self, square_pos: u8) -> MoveList {
         let turn = self.turn.index();
         let attacks = attacks::KING_ATTACKS[square_pos as usize];
         let opponent = self.colors[1 - turn];
-        mv_list.readMoves(square_pos, (opponent & attacks).0, false);
+        MoveList::read_moves(square_pos, (opponent & attacks).0, false)
     }
 
     pub fn gen_duck_moves(&self) -> Bitboard {
@@ -172,7 +191,6 @@ impl Board {
 
 
     // Move Validation Section
-
 
     pub fn is_move_legal(&self, mv: Move) -> bool {
         let (from, to, promo, promoPiece) = mv.unpack();

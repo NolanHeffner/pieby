@@ -1,5 +1,7 @@
 #![allow(unused, non_snake_case)]
 
+use std::time::{Duration};
+
 use crate::{
     board::{
         bitboard::Bitboard, 
@@ -13,8 +15,8 @@ use crate::{
 pub struct PlayerInfo {
     color: Color,
     castling_rights: bool,
-    time_remaining: f64,
-    increment: f64,
+    initial_time: Duration,
+    increment: Duration,
 }
 
 #[derive(Clone)]
